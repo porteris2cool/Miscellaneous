@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<!-- By Ion-o-koji -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>AI Chatbot v5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    :root {
+      --bg: #0b000a;
+      --surface: #0a0a1a;
+      --surface-elevated: #1a141a;
+      --border: #1f1f1f;
+      --text: #ffffff;
+      --text-secondary: #888888;
+      --accent: #8b5cf6;
+      --accent-glow: rgba(139, 92, 246, 0.4);
+      --user-bubble: #8b5cf6;
+      --ai-bubble: #1f1f1f;
+      --success: #22c55e;
+      --danger: #dc2626;
+    }
+
+    html {
+      height: -webkit-fill-available;
+    }
+
+    body {
+      height: 100vh;
+      height: 100dvh;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+    }
+
+    .app {
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      max-width: 100%;
+      margin: 0 auto;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .header-title {
+      flex: 1;
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .menu-btn {
+      width: 32px;
+      height: 32px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .menu-btn:hover {
+      border-color: var(--accent);
+      background: rgba(139, 92, 246, 0.1);
+    }
+
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 320px;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 0.3s ease;
+    }
+
+    .settings-panel.open {
+      transform: translateX(0);
+    }
+
+    .settings-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      display: none;
+    }
+
+    .settings-overlay.open {
+      display: block;
+    }
+
+    .settings-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .settings-header h2 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .close-btn {
+      width: 28px;
+      height: 28px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .close-btn:hover {
+      color: var(--accent);
+    }
+
+    .settings-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .setting-group {
+      margin-bottom: 20px;
+    }
+
+    .setting-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .setting-value {
+      display: block;
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    .slider-input {
+      width: 100%;
+      height: 4px;
+      border-radius: 2px;
+      background: var(--border);
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .slider-input::-webkit-slider-thumb:hover {
+      background: #a855f7;
+    }
+
+    .slider-input::-moz-range-thumb {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      border: none;
+      transition: background 0.2s;
+    }
+
+    .slider-input::-moz-range-thumb:hover {
+      background: #a855f7;
+    }
+
+    .number-input {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+    }
+
+    .number-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .textarea-input {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+      max-height: 150px;
+    }
+
+    .textarea-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .select-input {
+      width: 100%;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      cursor: pointer;
+    }
+
+    .select-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .select-input option {
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .clear-btn {
+      width: 100%;
+      padding: 10px 16px;
+      background: var(--danger);
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 10px;
+    }
+
+    .clear-btn:hover {
+      background: #b91c1c;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #8b5cf6, #a855f7);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .logo-text {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      background: rgba(34, 197, 94, 0.15);
+      color: #22c55e;
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      scroll-behavior: smooth;
+    }
+
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      margin-top: 100px;
+      align-items: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 20px;
+    }
+
+    .welcome-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #8b5cf6, #a855f7);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .welcome-title {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .welcome-subtitle {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .suggestions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 320px;
+    }
+
+    .suggestion {
+      padding: 12px 16px;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      margin: 5px;
+    }
+
+    .suggestion:hover {
+      border-color: var(--accent);
+      color: var(--text);
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      animation: fadeIn 0.2s ease;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+      background: var(--user-bubble);
+      align-self: flex-end;
+    }
+
+    .message.ai .message-avatar {
+      background: var(--ai-bubble);
+      border: 1px solid var(--border);
+      align-self: flex-end;
+    }
+
+    .message-content {
+      max-width: calc(100% - 40px);
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 14px;
+      line-height: 1.5;
+      word-wrap: break-word;
+      position: relative;
+    }
+
+    .message.user .message-content {
+      background: var(--user-bubble);
+      border-bottom-right-radius: 4px;
+    }
+
+    .message.ai .message-content {
+      background: var(--ai-bubble);
+      border: 1px solid var(--border);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.ai .message-content pre {
+      background: #0a0a0a;
+      padding: 10px;
+      border-radius: 6px;
+      overflow-x: auto;
+      margin: 8px 0;
+      font-family: 'SF Mono', monospace;
+      font-size: 12px;
+      position: relative;
+    }
+
+    .message.ai .message-content code {
+      background: #0a0a0a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'SF Mono', monospace;
+      font-size: 12px;
+    }
+
+    .copy-code-btn {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.2s;
+      z-index: 10;
+    }
+
+    .copy-code-btn:hover {
+      background: var(--accent);
+      color: white;
+    }
+
+    .message-actions {
+      display: none;
+      gap: 4px;
+      position: absolute;
+      bottom: -35px;
+      left: 0;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px;
+      z-index: 10;
+      width: max-content;
+    }
+
+    .message:hover .message-actions {
+      display: flex;
+    }
+
+    .message.user .message-actions {
+      left: auto;
+      right: 0;
+    }
+
+    .action-btn {
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover {
+      background: rgba(139, 92, 246, 0.2);
+    }
+
+    .action-btn.delete {
+      color: var(--danger);
+    }
+
+    .action-btn.delete:hover {
+      background: rgba(220, 38, 38, 0.2);
+    }
+
+    .typing {
+      display: flex;
+      gap: 3px;
+      padding: 4px 0;
+    }
+
+    .typing-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: bounce 1.4s infinite;
+    }
+
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+
+      30% {
+        transform: translateY(-6px);
+      }
+    }
+
+    .input-area {
+      padding: 12px 16px;
+      padding-bottom: calc(12px + env(safe-area-inset-bottom));
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      background: var(--surface-elevated);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 8px 8px 8px 16px;
+    }
+
+    .input-wrapper:focus-within {
+      border-color: var(--accent);
+    }
+
+    .chat-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 14px;
+      resize: none;
+      max-height: 100px;
+      min-height: 20px;
+      outline: none;
+      font-family: inherit;
+      padding: 4px 0;
+      margin: auto 0;
+      display: block;
+      width: 100%;
+    }
+
+    .chat-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .button-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .send-btn,
+    .stop-btn {
+      width: 32px;
+      height: 32px;
+      border: none;
+      border-radius: 50%;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-btn {
+      background: var(--accent);
+    }
+
+    .send-btn:hover:not(:disabled) {
+      background: #7c3aed;
+      transform: scale(1.05);
+    }
+
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .stop-btn {
+      background: var(--danger);
+      display: none;
+    }
+
+    .stop-btn.show {
+      display: flex;
+    }
+
+    .stop-btn:hover {
+      background: #b91c1c;
+      transform: scale(1.05);
+    }
+
+    .send-btn svg,
+    .stop-btn svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #dc2626;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 1000;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      background: var(--success);
+    }
+
+    @media (min-width: 768px) {
+      body {
+        background: #0a0a0a;
+      }
+
+      .app {
+        max-width: 800px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-left: 1px solid var(--border);
+        border-right: 1px solid var(--border);
+      }
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header class="header">
+      <div></div>
+      <div class="header-title">Chat Assistant - Gemini</div>
+      <button class="menu-btn" id="menuBtn" title="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
+      </button>
+    </header>
+
+    <div class="chat-container" id="chatContainer">
+      <div class="welcome" id="welcome">
+        <h1 class="welcome-title">How can I help you?</h1>
+        <div class="suggestions">
+          <button class="suggestion" onclick="setInput('How do I fix this code in JavaScript: ')">
+            How do I fix this code in JavaScript:
+          </button>
+          <button class="suggestion" onclick="setInput('In this code in JavaScript it wont * how do I fix it here is the code: ')">
+            In this code in JavaScript it wont * how do I fix it:
+          </button>
+          <button class="suggestion" onclick="setInput('In JavaScript how do I ')">
+            In JavaScript how do I
+          </button>
+          <button class="suggestion" onclick="setInput('In JavaScript how dose this work: ')">
+            In JavaScript how dose this work:
+          </button>
+          <button class="suggestion" onclick="setInput('Translate this sentence into Khmer: ')">
+            Translate this sentence into Khmer:
+          </button>
+          <button class="suggestion" onclick="setInput('Translate this sentence into English: ')">
+            Translate this sentence into English:
+          </button>
+        </div>
+      </div>
+      <div class="messages hidden" id="messages"></div>
+    </div>
+
+    <div class="input-area">
+      <div class="input-wrapper">
+        <textarea class="chat-input" id="chatInput" placeholder="Message..." rows="1"></textarea>
+        <div class="button-group">
+          <button class="send-btn" id="sendBtn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
+            </svg>
+          </button>
+          <button class="stop-btn" id="stopBtn" title="Stop">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <rect x="6" y="6" width="12" height="12"></rect>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-overlay" id="settingsOverlay"></div>
+  <div class="settings-panel" id="settingsPanel">
+    <div class="settings-header">
+      <h2>Settings</h2>
+      <button class="close-btn" id="closeSettingsBtn">&times;</button>
+    </div>
+    <div class="settings-content">
+      <div class="setting-group">
+        <label class="setting-label">System Prompt</label>
+        <textarea id="systemPrompt" class="textarea-input" placeholder="Enter system instructions for the AI..."></textarea>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Conversation Presets</label>
+        <select id="presets" class="select-input">
+          <option value="none">Select a preset...</option>
+          <option value="default">Default Assistant</option>
+          <option value="teacher">Brilliant Teacher</option>
+          <option value="developer">Expert Developer</option>
+          <option value="engineer">Fact-Driven Engineer</option>
+          <option value="religion">Religious Expert</option>
+          <option value="creative">Creative Visionary</option>
+          <option value="professional">Professional Advisor</option>
+          <option value="analyst">Data Analyst</option>
+          <option value="tutor">Patient Tutor</option>
+        </select>
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Temperature</label>
+        <div class="setting-value" id="tempValue">0.7</div>
+        <input type="range" id="temperature" class="slider-input" min="0" max="2" step="0.1" value="0.7">
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Max Output Tokens</label>
+        <input type="number" id="maxTokens" class="number-input" min="256" max="8192" value="2048">
+      </div>
+
+      <div class="setting-group">
+        <label class="setting-label">Free Models (Gemini)</label>
+        <select id="freeModels" class="select-input">
+          <option value="gemini-1.5-flash">Gemini 1.5 Flash (Recommended)</option>
+          <option value="gemini-pro">Gemini Pro</option>
+        </select>
+        <div style="font-size: 11px; color: var(--text-secondary); margin-top: 6px;"></div>
+      </div>
+
+      <button class="clear-btn" id="clearChatBtn">Clear All Messages</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const chatContainer = document.getElementById('chatContainer');
+    const welcome = document.getElementById('welcome');
+    const messages = document.getElementById('messages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const stopBtn = document.getElementById('stopBtn');
+    const toast = document.getElementById('toast');
+    const menuBtn = document.getElementById('menuBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const temperatureSlider = document.getElementById('temperature');
+    const tempValue = document.getElementById('tempValue');
+    const maxTokensInput = document.getElementById('maxTokens');
+    const systemPromptInput = document.getElementById('systemPrompt');
+    const presetsSelect = document.getElementById('presets');
+    const clearChatBtn = document.getElementById('clearChatBtn');
+
+    let isGenerating = false;
+    let conversation = [];
+    let abortController = null;
+
+    // API Configuration
+    const GEMINI_API_KEY = '';
+    const GEMINI_API_URL = '';
+
+    // Conversation Presets
+    const PRESETS = {
+      default: {
+        name: 'Default Assistant',
+        systemPrompt: 'You are a helpful AI assistant. Provide clear, accurate, and concise answers to the user\'s questions.'
+      },
+      teacher: {
+        name: 'Brilliant Teacher',
+        systemPrompt: `You are an exceptional and patient educator with the ability to explain complex concepts in simple, engaging ways. Your teaching style includes:
+- Breaking down difficult topics into digestible parts
+- Using real-world examples and analogies
+- Asking questions to check understanding
+- Encouraging curiosity and deeper learning
+- Providing step-by-step guidance
+- Adapting explanations to different learning styles
+Always prioritize clarity and engagement over technical jargon. Make learning enjoyable and intuitive.`
+      },
+      developer: {
+        name: 'Expert Developer',
+        systemPrompt: `You are a senior software engineer with 15+ years of experience across multiple languages and frameworks. Your expertise includes:
+- Writing clean, efficient, production-ready code
+- Following SOLID principles and design patterns
+- Optimizing for performance and scalability
+- Security best practices and vulnerability prevention
+- Code review and best practices
+- Architecture and system design
+- Debugging and troubleshooting
+Be pragmatic, direct, and focus on practical solutions. Provide code examples when relevant. Consider edge cases and potential issues.`
+      },
+      engineer: {
+        name: 'Fact-Driven Engineer',
+        systemPrompt: `You are a rigorous engineer who values evidence, data, and empirical observation. Your approach includes:
+- Basing solutions on verified research and proven methodologies
+- Distinguishing between facts, assumptions, and specifications
+- Explaining technical reasoning and engineering principles
+- Acknowledging limitations and tolerances
+- Correcting misconceptions with evidence
+- Explaining complex engineering concepts accurately
+- Being precise with measurements and standards
+Always base responses on verified technical data and engineering best practices. Be precise with terminology and explain your reasoning clearly.`
+      },
+      religion: {
+        name: 'Religious Expert',
+        systemPrompt: `You are a knowledgeable and respectful expert on world religions and spirituality. Your approach includes:
+- Speaking with respect and reverence about all faiths
+- Providing accurate historical and theological information
+- Acknowledging the diversity within religions
+- Explaining beliefs, practices, and traditions clearly
+- Being courteous and non-judgmental toward all traditions
+- Recognizing the spiritual significance to believers
+- Contextualizing religious concepts appropriately
+- Encouraging interfaith understanding and dialogue
+Always maintain respect for all religions and spiritual traditions. Be inclusive, accurate, and promote understanding between different faiths.`
+      },
+      creative: {
+        name: 'Creative Visionary',
+        systemPrompt: `You are a highly creative thinker who challenges conventional wisdom and explores innovative possibilities. Your approach includes:
+- Thinking outside the box and considering unconventional solutions
+- Encouraging experimentation and taking calculated risks
+- Building on ideas without immediately dismissing them
+- Using metaphors, analogies, and thought experiments
+- Exploring multiple perspectives and "what-if" scenarios
+- Brainstorming and ideation
+- Combining ideas in novel ways
+Embrace creativity, imagination, and novel approaches. Encourage bold thinking while remaining thoughtful about feasibility.`
+      },
+      professional: {
+        name: 'Professional Advisor',
+        systemPrompt: `You are a seasoned business professional and consultant with expertise across industries. Your approach includes:
+- Providing strategic and tactical advice
+- Focusing on ROI, efficiency, and outcomes
+- Understanding market dynamics and competition
+- Offering leadership and management insights
+- Considering business implications and risks
+- Being concise and results-oriented
+- Recommending actionable next steps
+Provide pragmatic, business-focused guidance. Be direct and focus on tangible results and impact.`
+      },
+      analyst: {
+        name: 'Data Analyst',
+        systemPrompt: `You are an expert data analyst skilled in statistical analysis, data interpretation, and insights discovery. Your approach includes:
+- Asking clarifying questions about data context
+- Explaining statistical concepts clearly
+- Identifying patterns, trends, and anomalies
+- Recommending appropriate analytical methods
+- Discussing data limitations and confidence levels
+- Providing actionable insights from data
+- Suggesting visualization approaches
+Focus on accurate, evidence-based analysis. Question assumptions and help interpret results properly.`
+      },
+      tutor: {
+        name: 'Patient Tutor',
+        systemPrompt: `You are a dedicated tutor known for infinite patience and ability to meet students where they are. Your approach includes:
+- Meeting learners at their level of understanding
+- Providing encouragement and positive reinforcement
+- Taking time to explain repeatedly without frustration
+- Using varied examples and practice problems
+- Identifying knowledge gaps and addressing them
+- Celebrating progress and effort
+- Customizing explanations to individual needs
+Be warm, encouraging, and never condescending. Adapt your pace and explanations based on understanding shown.`
+      }
+    };
+
+    // Settings defaults
+    const DEFAULT_SETTINGS = {
+      temperature: 0.7,
+      maxTokens: 2048,
+      systemPrompt: ''
+    };
+
+    // Load settings from localStorage
+    function loadSettings() {
+      const saved = localStorage.getItem('chatbotSettings');
+      if (saved) {
+        const settings = JSON.parse(saved);
+        temperatureSlider.value = settings.temperature || DEFAULT_SETTINGS.temperature;
+        maxTokensInput.value = settings.maxTokens || DEFAULT_SETTINGS.maxTokens;
+        systemPromptInput.value = settings.systemPrompt || DEFAULT_SETTINGS.systemPrompt;
+        updateTempDisplay();
+      }
+    }
+
+    // Save settings to localStorage
+    function saveSettings() {
+      const settings = {
+        temperature: parseFloat(temperatureSlider.value),
+        maxTokens: parseInt(maxTokensInput.value),
+        systemPrompt: systemPromptInput.value
+      };
+      localStorage.setItem('chatbotSettings', JSON.stringify(settings));
+      showToast('Settings saved', 'success');
+    }
+
+    // Update temperature display
+    function updateTempDisplay() {
+      tempValue.textContent = parseFloat(temperatureSlider.value).toFixed(1);
+    }
+
+    // Apply preset
+    presetsSelect.addEventListener('change', (e) => {
+      if (e.target.value !== 'none') {
+        const preset = PRESETS[e.target.value];
+        systemPromptInput.value = preset.systemPrompt;
+        saveSettings();
+        showToast(`Preset: ${preset.name} applied`, 'success');
+      }
+      e.target.value = 'none';
+    });
+
+    // Settings panel toggle
+    menuBtn.addEventListener('click', () => {
+      settingsPanel.classList.add('open');
+      settingsOverlay.classList.add('open');
+    });
+
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsPanel.classList.remove('open');
+      settingsOverlay.classList.remove('open');
+    });
+
+    settingsOverlay.addEventListener('click', () => {
+      settingsPanel.classList.remove('open');
+      settingsOverlay.classList.remove('open');
+    });
+
+    // Auto-save settings on change
+    temperatureSlider.addEventListener('input', () => {
+      updateTempDisplay();
+      saveSettings();
+    });
+
+    maxTokensInput.addEventListener('change', saveSettings);
+    systemPromptInput.addEventListener('change', saveSettings);
+
+    // Clear chat
+    clearChatBtn.addEventListener('click', () => {
+      if (conversation.length === 0) {
+        showToast('No messages to clear', 'success');
+        return;
+      }
+      if (confirm('Are you sure you want to delete all messages? This cannot be undone.')) {
+        conversation = [];
+        messages.innerHTML = '';
+        welcome.classList.remove('hidden');
+        messages.classList.add('hidden');
+        showToast('Chat cleared', 'success');
+      }
+    });
+
+    // Load settings on page load
+    loadSettings();
+
+    function setInput(text) {
+      chatInput.value = text;
+      chatInput.focus();
+      autoResize();
+    }
+
+    function autoResize() {
+      chatInput.style.height = 'auto';
+      chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+    }
+
+    chatInput.addEventListener('input', autoResize);
+
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        scrollToBottom();
+      });
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    stopBtn.addEventListener('click', stopGeneration);
+
+    // Simple and reliable clipboard copy function
+    function copyToClipboard(text) {
+      return new Promise((resolve) => {
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(text)
+            .then(() => resolve(true))
+            .catch(() => fallbackCopy(text, resolve));
+        } else {
+          fallbackCopy(text, resolve);
+        }
+      });
+    }
+
+    function fallbackCopy(text, resolve) {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '0';
+        textArea.style.top = '0';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+
+        // For mobile
+        if (navigator.userAgent.match(/iphone|ipad|ipod|android/i)) {
+          textArea.setSelectionRange(0, text.length);
+        } else {
+          textArea.select();
+        }
+
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        resolve(successful);
+      } catch (err) {
+        console.error('Copy failed:', err);
+        resolve(false);
+      }
+    }
+
+    function showToast(message, type = 'error') {
+      toast.textContent = message;
+      toast.classList.remove('success');
+      if (type === 'success') toast.classList.add('success');
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function addMessage(role, content) {
+      if (!welcome.classList.contains('hidden')) {
+        welcome.classList.add('hidden');
+        messages.classList.remove('hidden');
+      }
+
+      const msgDiv = document.createElement('div');
+      msgDiv.className = `message ${role}`;
+
+      const avatar = role === 'user' ? '👤' : '🤖';
+      const formattedContent = formatContent(content);
+
+      msgDiv.innerHTML = `
+        <div class="message-avatar">${avatar}</div>
+        <div class="message-content">${formattedContent}</div>
+      `;
+
+      messages.appendChild(msgDiv);
+      addMessageActions(msgDiv, role, content);
+      scrollToBottom();
+      return msgDiv;
+    }
+
+    function addMessageActions(msgDiv, role, content) {
+      const contentDiv = msgDiv.querySelector('.message-content');
+
+      // Create actions container
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = 'message-actions';
+
+      // Copy full message button
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'action-btn';
+      copyBtn.textContent = 'Copy';
+      copyBtn.onclick = async () => {
+        const success = await copyToClipboard(content);
+        showToast(success ? 'Message copied!' : 'Copy failed', success ? 'success' : 'error');
+      };
+      actionsDiv.appendChild(copyBtn);
+
+      // Copy code button (if message contains code)
+      if (content.includes('```') || (role === 'ai' && content.includes('<code>'))) {
+        const copyCodeBtn = document.createElement('button');
+        copyCodeBtn.className = 'action-btn';
+        copyCodeBtn.textContent = 'Code';
+        copyCodeBtn.onclick = async () => {
+          const codeMatch = content.match(/```[\w]*\n([\s\S]*?)```/);
+          const code = codeMatch ? codeMatch[1].trim() : extractTextFromHtml(content);
+          const success = await copyToClipboard(code);
+          showToast(success ? 'Code copied!' : 'Copy failed', success ? 'success' : 'error');
+        };
+        actionsDiv.appendChild(copyCodeBtn);
+      }
+
+      // Edit button (for user messages)
+      if (role === 'user') {
+        const editBtn = document.createElement('button');
+        editBtn.className = 'action-btn';
+        editBtn.textContent = 'Edit';
+        editBtn.onclick = () => {
+          chatInput.value = content;
+          autoResize();
+          chatInput.focus();
+          msgDiv.remove();
+          conversation.pop();
+        };
+        actionsDiv.appendChild(editBtn);
+      }
+
+      // Regenerate button (for AI messages)
+      if (role === 'ai') {
+        const regenerateBtn = document.createElement('button');
+        regenerateBtn.className = 'action-btn';
+        regenerateBtn.textContent = 'Regen';
+        regenerateBtn.onclick = () => {
+          if (conversation.length > 0) {
+            const lastUserMsg = [...conversation].reverse().find(m => m.role === 'user');
+            if (lastUserMsg) {
+              msgDiv.remove();
+              conversation.pop();
+              chatInput.value = lastUserMsg.content;
+              sendMessage();
+            }
+          }
+        };
+        actionsDiv.appendChild(regenerateBtn);
+      }
+
+      // Delete button
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'action-btn delete';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.onclick = () => {
+        const index = Array.from(messages.children).indexOf(msgDiv);
+        if (index !== -1) {
+          conversation.splice(index, 1);
+        }
+        msgDiv.remove();
+      };
+      actionsDiv.appendChild(deleteBtn);
+
+      msgDiv.appendChild(actionsDiv);
+    }
+
+    // Add code copy buttons to pre elements
+    function addCodeCopyButtons() {
+      const preElements = document.querySelectorAll('.message.ai .message-content pre');
+      preElements.forEach(pre => {
+        if (!pre.querySelector('.copy-code-btn')) {
+          const copyBtn = document.createElement('button');
+          copyBtn.className = 'copy-code-btn';
+          copyBtn.textContent = 'Copy';
+          copyBtn.onclick = async () => {
+            const code = pre.querySelector('code')?.textContent || pre.textContent;
+            const success = await copyToClipboard(code);
+            showToast(success ? 'Code copied!' : 'Copy failed', success ? 'success' : 'error');
+          };
+          pre.appendChild(copyBtn);
+        }
+      });
+    }
+
+    function extractTextFromHtml(html) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      return div.textContent || div.innerText || '';
+    }
+
+    function formatContent(content) {
+      content = content
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        return `<pre><code>${code.trim()}</code></pre>`;
+      });
+
+      content = content.replace(/`([^`]+)`/g, '<code>$1</code>');
+      content = content.replace(/\n/g, '<br>');
+
+      return content;
+    }
+
+    function addTypingIndicator() {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ai';
+      msgDiv.id = 'typing-indicator';
+      msgDiv.innerHTML = `
+        <div class="message-avatar">🤖</div>
+        <div class="message-content">
+          <div class="typing">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+          </div>
+        </div>
+      `;
+      messages.appendChild(msgDiv);
+      scrollToBottom();
+    }
+
+    function removeTypingIndicator() {
+      const indicator = document.getElementById('typing-indicator');
+      if (indicator) indicator.remove();
+    }
+
+    function scrollToBottom() {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    function stopGeneration() {
+      if (abortController) {
+        abortController.abort();
+        abortController = null;
+        isGenerating = false;
+        stopBtn.classList.remove('show');
+        sendBtn.disabled = false;
+        removeTypingIndicator();
+        showToast('Generation stopped', 'success');
+      }
+    }
+
+    async function sendMessage() {
+      const text = chatInput.value.trim();
+      if (!text || isGenerating) return;
+
+      if (!GEMINI_API_KEY || GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE') {
+        showToast('Please set your Gemini API key');
+        return;
+      }
+
+      chatInput.value = '';
+      chatInput.style.height = 'auto';
+
+      addMessage('user', text);
+      conversation.push({
+        role: 'user',
+        content: text
+      });
+
+      isGenerating = true;
+      sendBtn.disabled = true;
+      stopBtn.classList.add('show');
+      abortController = new AbortController();
+      addTypingIndicator();
+
+      try {
+        const contents = [];
+
+        // Add system prompt if provided
+        if (systemPromptInput.value.trim()) {
+          contents.push({
+            role: 'user',
+            parts: [{
+              text: systemPromptInput.value
+            }]
+          });
+          contents.push({
+            role: 'model',
+            parts: [{
+              text: 'I understand. I will follow these instructions.'
+            }]
+          });
+        }
+
+        // Add conversation
+        contents.push(...conversation.map(msg => ({
+          role: msg.role === 'user' ? 'user' : 'model',
+          parts: [{
+            text: msg.content
+          }]
+        })));
+
+        const response = await fetch(
+          `${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            signal: abortController.signal,
+            body: JSON.stringify({
+              contents: contents,
+              generationConfig: {
+                temperature: parseFloat(temperatureSlider.value),
+                topK: 40,
+                topP: 0.95,
+                maxOutputTokens: parseInt(maxTokensInput.value)
+              }
+            })
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error('API Error:', errorData);
+          throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiMessage = data.candidates?.[0]?.content?.parts?.[0]?.text || 'No response received';
+
+        removeTypingIndicator();
+        addMessage('ai', aiMessage);
+        addCodeCopyButtons();
+        conversation.push({
+          role: 'assistant',
+          content: aiMessage
+        });
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          // Generation was stopped by user
+        } else {
+          removeTypingIndicator();
+          const errorMsg = error.message.includes('quota') ?
+            'API quota exceeded. Please check your API key and usage limits.' :
+            `Error: ${error.message}`;
+          addMessage('ai', errorMsg);
+          showToast('Failed to get response');
+          console.error('Error:', error);
+        }
+      } finally {
+        isGenerating = false;
+        sendBtn.disabled = false;
+        stopBtn.classList.remove('show');
+        abortController = null;
+        chatInput.focus();
+      }
+    }
+
+    localStorage.setItem('Ion-o-koji Watermark', `${localStorage.getItem('Ion-o-koji Watermark') || ''} AI Chatbot v5,`);
+
+  </script>
+</body>
+
+</html>
