@@ -136,7 +136,7 @@
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23fff' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOct[...]
       background-size: 128px 128px;
     }
 
@@ -220,6 +220,7 @@
       gap: 10px;
       padding: 10px 16px;
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
     .sort-dropdown {
@@ -238,9 +239,56 @@
       border-color: var(--accent);
     }
 
+    .filter-group {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+
+    .filter-btn {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 6px 11px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .filter-arrow {
+      font-size: 10px;
+      opacity: 0.6;
+      transition: transform 0.2s;
+    }
+
+    .filter-btn.active .filter-arrow {
+      opacity: 1;
+    }
+
+    .filter-btn.active.reversed .filter-arrow {
+      transform: scaleY(-1);
+    }
+
     .view-toggle {
       display: flex;
       gap: 4px;
+      margin-left: auto;
     }
 
     .view-btn {
@@ -695,6 +743,13 @@
       .controls-bar {
         flex-wrap: wrap;
       }
+
+      .view-toggle {
+        margin-left: 0;
+        order: 3;
+        width: 100%;
+        justify-content: flex-end;
+      }
     }
 
   </style>
@@ -737,7 +792,7 @@
   </aside>
 
   <div id="mainScreen" style="position:relative; z-index:1; min-height:100vh;">
-    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); position:sticky; top:0; z-index:10;">
+    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px);">
       <div style="display:flex; align-items:center; gap:12px;">
         <button id="openSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;" aria-label="Open menu">
           <i data-lucide="menu" style="width:22px; height:22px;"></i>
@@ -764,6 +819,23 @@
         <option value="extension">Sort: Extension</option>
         <option value="size">Sort: Size</option>
       </select>
+      <div class="filter-group">
+        <button id="pinnedFilterBtn" class="filter-btn" title="Show pinned files first">
+          <i data-lucide="pin" style="width:12px; height:12px;"></i>
+          Pinned
+          <span class="filter-arrow">▼</span>
+        </button>
+        <button id="sizeFilterBtn" class="filter-btn" title="Filter by file size">
+          <i data-lucide="database" style="width:12px; height:12px;"></i>
+          Size
+          <span class="filter-arrow">▼</span>
+        </button>
+        <button id="modifiedFilterBtn" class="filter-btn" title="Show recently modified files">
+          <i data-lucide="clock" style="width:12px; height:12px;"></i>
+          Modified
+          <span class="filter-arrow">▼</span>
+        </button>
+      </div>
       <div class="view-toggle">
         <button id="gridViewBtn" class="view-btn active" title="Grid View">
           <i data-lucide="grid-3x3" style="width:16px; height:16px;"></i>
@@ -798,6 +870,14 @@
       sortBy: 'name',
       viewMode: 'grid',
       draggedPinIndex: null,
+      filters: {
+        pinned: false,
+        pinnedReversed: false,
+        size: false,
+        sizeReversed: false,
+        modified: false,
+        modifiedReversed: false,
+      }
     };
 
     const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
@@ -814,6 +894,10 @@
       localStorage.setItem('Ion-o-koji_viewMode', state.viewMode);
     }
 
+    function saveFilterPreferences() {
+      localStorage.setItem('Ion-o-koji_filters', JSON.stringify(state.filters));
+    }
+
     function loadPins() {
       try {
         const d = JSON.parse(localStorage.getItem('Ion-o-koji_pins'));
@@ -824,8 +908,14 @@
     function loadPreferences() {
       const sortBy = localStorage.getItem('Ion-o-koji_sortBy');
       const viewMode = localStorage.getItem('Ion-o-koji_viewMode');
+      const filters = localStorage.getItem('Ion-o-koji_filters');
       if (sortBy) state.sortBy = sortBy;
       if (viewMode) state.viewMode = viewMode;
+      if (filters) {
+        try {
+          state.filters = JSON.parse(filters);
+        } catch (e) {}
+      }
     }
 
     function toast(msg, type = 'info') {
@@ -872,6 +962,15 @@
       return data.size || 0;
     }
 
+    async function getFileCommitDate(path) {
+      const url = `https://api.github.com/repos/${state.owner}/${state.repo}/commits?path=${path}&per_page=1`;
+      const res = await fetch(url);
+      if (!res.ok) return new Date(0);
+      const data = await res.json();
+      if (data.length === 0) return new Date(0);
+      return new Date(data[0].commit.committer.date);
+    }
+
     function parseTree(tree) {
       const files = [];
       const folderSet = new Set();
@@ -894,6 +993,7 @@
           extension: ext,
           folder,
           size: item.size || 0,
+          commitDate: new Date(0),
         });
 
         for (let i = 1; i < parts.length; i++) {
@@ -1002,402 +1102,393 @@
           w.document.write(html);
           w.document.close();
         }
-
-        toast('Launching ' + file.fullName, 'success');
       } catch (e) {
         toast('Failed: ' + e.message, 'error');
       }
     }
 
-    function renderMarkdown(md, title) {
-      let html = md
-        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;">')
-        .replace(/^---$/gm, '<hr>')
-        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
-        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-        .replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-        .replace(/\n{2,}/g, '</p><p>')
-        .replace(/\n/g, '<br>');
-
-      return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>${title}</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:32px 24px;background:#0c0c0d;color:#e4e4e7;line-height:1.75;}
-h1{color:#F5A623;font-size:1.8em;margin:1.2em 0 0.4em;border-bottom:1px solid #222;padding-bottom:0.3em;}
-h2{color:#F5A623;font-size:1.4em;margin:1em 0 0.4em;}
-h3{color:#d4d4d8;font-size:1.15em;margin:0.8em 0 0.3em;}
-h4{color:#a1a1aa;font-size:1em;margin:0.6em 0 0.2em;}
-a{color:#F5A623;}code{background:#1a1a1e;padding:2px 7px;border-radius:4px;font-size:0.88em;color:#F5A623;}
-pre{background:#111214;padding:16px;border-radius:10px;overflow-x:auto;border:1px solid #282A2E;}
-pre code{background:none;padding:0;color:#d4d4d8;font-size:0.85em;}
-ul,ol{padding-left:24px;}li{margin:4px 0;}
-hr{border:none;border-top:1px solid #282A2E;margin:1.5em 0;}
-img{border-radius:8px;}
-p{margin:0.5em 0;}
-</style></head><body><p>${html}</p></body></html>`;
-    }
-
-    function togglePin(path) {
-      const idx = state.pinned.indexOf(path);
-      if (idx === -1) {
-        state.pinned.push(path);
-        toast('Pinned', 'success');
-      } else {
-        state.pinned.splice(idx, 1);
-        toast('Unpinned');
+    function renderMarkdown(md, filename) {
+      const lines = md.split('\n');
+      let html = `<html><head><meta charset="UTF-8"><title>${filename}</title><style>body{font-family:Arial,sans-serif;line-height:1.6;max-width:900px;margin:0 auto;padding:20px;color:#333;}h1,h2,h3{margin-top:24px;margin-bottom:16px;}code{background:#f4f4f4;padding:2px 6px;border-radius:3px;font-family:monospace;}pre{background:#f4f4f4;padding:12px;border-radius:3px;overflow-x:auto;}blockquote{border-left:4px solid #ddd;margin:0;padding-left:16px;color:#666;}</style></head><body>`;
+      
+      for (const line of lines) {
+        if (line.startsWith('# ')) {
+          html += `<h1>${line.slice(2)}</h1>`;
+        } else if (line.startsWith('## ')) {
+          html += `<h2>${line.slice(3)}</h2>`;
+        } else if (line.startsWith('### ')) {
+          html += `<h3>${line.slice(4)}</h3>`;
+        } else if (line.startsWith('- ')) {
+          html += `<li>${line.slice(2)}</li>`;
+        } else if (line.trim()) {
+          html += `<p>${line}</p>`;
+        }
       }
-      savePins();
-      renderPinned();
-      renderFiles();
-    }
-
-    function openSidebar() {
-      document.getElementById('sidebar').classList.add('open');
-      document.getElementById('sidebarOverlay').classList.add('open');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-
-    function renderTabs() {
-      const bar = document.getElementById('tabBar');
-      let h = '';
-
-      const allCount = state.files.length;
-      h += `<button class="tab-item ${state.activeTab===''?'active':''}" data-tab="" role="tab" aria-selected="${state.activeTab===''}">All <span class="tab-count">${allCount}</span></button>`;
-
-      const foldersWithFiles = state.folders.filter(f => {
-        return state.files.some(fi => fi.folder === f && !fi.folder.includes(f + '/'));
-      });
-
-      for (const folder of foldersWithFiles) {
-        const label = folder.split('/').pop();
-        const count = state.files.filter(f => f.folder === folder).length;
-        const isActive = state.activeTab === folder;
-        h += `<button class="tab-item ${isActive?'active':''}" data-tab="${folder}" role="tab" aria-selected="${isActive}">${label} <span class="tab-count">${count}</span></button>`;
-      }
-
-      bar.innerHTML = h;
-      lucide.createIcons({
-        nodes: bar.querySelectorAll('[data-lucide]')
-      });
+      
+      html += '</body></html>';
+      return html;
     }
 
     function sortFiles(files) {
-      const sorted = [...files];
-      
-      if (state.sortBy === 'name') {
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (state.sortBy === 'name-desc') {
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
-      } else if (state.sortBy === 'extension') {
+      let sorted = [...files];
+
+      if (state.filters.pinned) {
         sorted.sort((a, b) => {
-          if (a.extension !== b.extension) return a.extension.localeCompare(b.extension);
-          return a.name.localeCompare(b.name);
+          const aIsPinned = state.pinned.includes(a.path);
+          const bIsPinned = state.pinned.includes(b.path);
+          if (aIsPinned && !bIsPinned) return -1;
+          if (!aIsPinned && bIsPinned) return 1;
+          return 0;
         });
-      } else if (state.sortBy === 'size') {
-        sorted.sort((a, b) => {
-          if (a.size !== b.size) return a.size - b.size;
-          return a.name.localeCompare(b.name);
-        });
+
+        if (state.filters.pinnedReversed) {
+          const pinnedCount = sorted.filter(f => state.pinned.includes(f.path)).length;
+          const unpinned = sorted.slice(pinnedCount);
+          const pinned = sorted.slice(0, pinnedCount);
+          sorted = [...unpinned, ...pinned];
+        }
+      } else if (state.filters.size) {
+        sorted.sort((a, b) => a.size - b.size);
+        if (state.filters.sizeReversed) sorted.reverse();
+      } else if (state.filters.modified) {
+        sorted.sort((a, b) => a.commitDate - b.commitDate);
+        if (state.filters.modifiedReversed) sorted.reverse();
+      } else {
+        if (state.sortBy === 'name') {
+          sorted.sort((a, b) => a.name.localeCompare(b.name));
+        } else if (state.sortBy === 'name-desc') {
+          sorted.sort((a, b) => b.name.localeCompare(a.name));
+        } else if (state.sortBy === 'extension') {
+          sorted.sort((a, b) => a.extension.localeCompare(b.extension));
+        } else if (state.sortBy === 'size') {
+          sorted.sort((a, b) => a.size - b.size);
+        }
       }
 
       return sorted;
     }
 
+    function filterFilesBySearch(files) {
+      if (!state.searchQuery) return files;
+      const q = state.searchQuery.toLowerCase();
+      return files.filter(f => 
+        f.name.toLowerCase().includes(q) || 
+        f.fullName.toLowerCase().includes(q)
+      );
+    }
+
+    function filterFilesByFolder(files) {
+      if (!state.activeTab) return files;
+      return files.filter(f => f.folder === state.activeTab);
+    }
+
     function renderFiles() {
+      let filtered = filterFilesByFolder(state.files);
+      filtered = filterFilesBySearch(filtered);
+      const sorted = sortFiles(filtered);
+
       const grid = document.getElementById('fileGrid');
-      let files = [...state.files];
+      grid.innerHTML = '';
 
-      if (state.activeTab !== '') {
-        files = files.filter(f => f.folder === state.activeTab);
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        files = files.filter(f => f.name.toLowerCase().includes(q) || f.fullName.toLowerCase().includes(q) || f.path.toLowerCase().includes(q));
-      }
-
-      if (files.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-            <i data-lucide="folder-open" style="width:48px; height:48px; margin-bottom:14px; opacity:0.25;"></i>
-            <p style="font-size:15px; font-weight:600; margin-bottom:4px;">No files found</p>
-            <p style="font-size:12px;">Try a different tab or search term</p>
-        </div>`;
-        lucide.createIcons();
+      if (sorted.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No files found</p></div>';
         return;
       }
 
-      files.sort((a, b) => {
-        const ap = state.pinned.includes(a.path) ? 0 : 1;
-        const bp = state.pinned.includes(b.path) ? 0 : 1;
-        if (ap !== bp) return ap - bp;
-        return 0;
-      });
+      for (const file of sorted) {
+        const isPinned = state.pinned.includes(file.path);
+        const btn = document.createElement('button');
+        btn.className = 'file-btn';
+        btn.innerHTML = `
+          <button class="action-btn pin-btn ${isPinned ? 'pinned' : ''}" title="Pin file">
+            <i data-lucide="pin" style="width:14px; height:14px;"></i>
+          </button>
+          <button class="action-btn download-btn" title="Download file">
+            <i data-lucide="download" style="width:14px; height:14px;"></i>
+          </button>
+          <i data-lucide="${fileIcon(file.extension)}" class="file-icon" style="color:${extColor(file.extension)};"></i>
+          <span class="file-name">${file.name}</span>
+          <span class="file-ext" style="color:${extColor(file.extension)}; background:${extColor(file.extension)}22;">${extLabel(file.extension)}</span>
+        `;
 
-      files = sortFiles(files);
+        btn.addEventListener('click', () => runFile(file));
 
-      let h = '';
-      files.forEach((file, i) => {
-        const pinned = state.pinned.includes(file.path);
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        const label = extLabel(file.extension);
-        const delay = Math.min(i * 30, 400);
-        h += `<div class="file-btn" data-run="${file.path}" style="animation-delay:${delay}ms;" tabindex="0" role="button" aria-label="Run ${file.fullName}">
-            <button class="action-btn pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
-                <i data-lucide="${pinned?'pin-off':'pin'}" style="width:13px; height:13px;"></i>
-            </button>
-            <button class="action-btn download-btn" data-download="${file.path}" aria-label="Download ${file.fullName}" title="Download">
-                <i data-lucide="download" style="width:13px; height:13px;"></i>
-            </button>
-            <i data-lucide="${icon}" class="file-icon" style="color:${col};"></i>
-            <span class="file-name">${escHtml(file.name)}</span>
-            <span class="file-ext" style="color:${col}; background:${col}18;">${label}</span>
-        </div>`;
-      });
+        const pinBtn = btn.querySelector('.pin-btn');
+        pinBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = state.pinned.indexOf(file.path);
+          if (idx >= 0) {
+            state.pinned.splice(idx, 1);
+          } else {
+            state.pinned.push(file.path);
+          }
+          savePins();
+          renderPinnedList();
+          renderFiles();
+        });
 
-      grid.innerHTML = h;
-      grid.className = state.viewMode === 'list' ? 'file-grid list-view' : 'file-grid';
+        const dlBtn = btn.querySelector('.download-btn');
+        dlBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          downloadFile(file);
+        });
+
+        grid.appendChild(btn);
+      }
+
       lucide.createIcons();
     }
 
-    function renderPinned() {
-      const list = document.getElementById('pinnedList');
-      const empty = document.getElementById('pinnedEmpty');
-      const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
+    function renderTabs() {
+      const tabBar = document.getElementById('tabBar');
+      tabBar.innerHTML = '';
 
-      if (pinnedFiles.length === 0) {
-        list.innerHTML = '';
-        empty.style.display = 'block';
+      const allBtn = document.createElement('button');
+      allBtn.className = 'tab-item';
+      if (!state.activeTab) allBtn.classList.add('active');
+      allBtn.innerHTML = `All <span class="tab-count">${state.files.length}</span>`;
+      allBtn.addEventListener('click', () => {
+        state.activeTab = '';
+        renderTabs();
+        renderFiles();
+      });
+      tabBar.appendChild(allBtn);
+
+      for (const folder of state.folders) {
+        const count = state.files.filter(f => f.folder === folder).length;
+        const btn = document.createElement('button');
+        btn.className = 'tab-item';
+        if (state.activeTab === folder) btn.classList.add('active');
+        btn.innerHTML = `${folder.split('/').pop()} <span class="tab-count">${count}</span>`;
+        btn.addEventListener('click', () => {
+          state.activeTab = folder;
+          renderTabs();
+          renderFiles();
+        });
+        tabBar.appendChild(btn);
+      }
+
+      lucide.createIcons();
+    }
+
+    function renderPinnedList() {
+      const pinnedList = document.getElementById('pinnedList');
+      const pinnedEmpty = document.getElementById('pinnedEmpty');
+      pinnedList.innerHTML = '';
+
+      if (state.pinned.length === 0) {
+        pinnedEmpty.style.display = 'block';
         return;
       }
-      empty.style.display = 'none';
 
-      let h = '';
-      pinnedFiles.forEach((file, idx) => {
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        h += `<button class="sidebar-item" data-run="${file.path}" draggable="true" data-pinned-idx="${idx}">
-            <i data-lucide="drag-handle" style="width:16px; height:16px; color:var(--muted); flex-shrink:0;"></i>
-            <i data-lucide="${icon}" style="width:16px; height:16px; color:${col}; flex-shrink:0;"></i>
-            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(file.name)}</span>
-            <i data-lucide="play" style="width:13px; height:13px; color:var(--muted); flex-shrink:0;"></i>
-        </button>`;
-      });
-      list.innerHTML = h;
+      pinnedEmpty.style.display = 'none';
+
+      for (const path of state.pinned) {
+        const file = state.files.find(f => f.path === path);
+        if (!file) continue;
+
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.draggable = true;
+        item.innerHTML = `
+          <i data-lucide="${fileIcon(file.extension)}" style="width:14px; height:14px; color:${extColor(file.extension)};"></i>
+          <span>${file.name}</span>
+        `;
+
+        item.addEventListener('dragstart', (e) => {
+          state.draggedPinIndex = state.pinned.indexOf(path);
+          item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+          state.draggedPinIndex = null;
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          item.classList.add('drag-over');
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (state.draggedPinIndex !== null) {
+            const draggedPath = state.pinned[state.draggedPinIndex];
+            const targetIndex = state.pinned.indexOf(path);
+            state.pinned.splice(state.draggedPinIndex, 1);
+            state.pinned.splice(targetIndex, 0, draggedPath);
+            savePins();
+            renderPinnedList();
+          }
+        });
+
+        item.addEventListener('click', () => runFile(file));
+
+        pinnedList.appendChild(item);
+      }
+
       lucide.createIcons();
     }
 
-    function escHtml(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    function showLoading() {
-      const grid = document.getElementById('fileGrid');
-      let h = '';
-      for (let i = 0; i < 12; i++) h += '<div class="skeleton"></div>';
-      grid.innerHTML = h;
-    }
-
-    function updateFileCount() {
-      const el = document.getElementById('fileCount');
-      let files = state.files;
-      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab);
-      el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
-    }
-
-    async function refreshRepo() {
-      closeSidebar();
-      showLoading();
+    async function init() {
       try {
+        loadPins();
+        loadPreferences();
+
         const branch = await fetchDefaultBranch(state.owner, state.repo);
         state.branch = branch;
 
-        const tree = await fetchTree(state.owner, state.repo, branch);
+        const tree = await fetchTree(state.owner, state.repo, state.branch);
         const parsed = parseTree(tree);
         state.files = parsed.files;
         state.folders = parsed.folders;
 
-        const paths = new Set(state.files.map(f => f.path));
-        state.pinned = state.pinned.filter(p => paths.has(p));
-        savePins();
+        document.getElementById('repoTitle').textContent = state.repo.replace(/-/g, ' ');
+        document.getElementById('repoSubtitle').textContent = `${state.owner}`;
+        document.getElementById('fileCount').textContent = `${state.files.length} files`;
 
-        document.getElementById('repoTitle').textContent = state.repo;
-        document.getElementById('repoSubtitle').textContent = state.owner + ' / ' + state.branch;
+        document.getElementById('sortDropdown').value = state.sortBy;
 
         renderTabs();
         renderFiles();
-        renderPinned();
-        updateFileCount();
-        toast('Loaded ' + state.files.length + ' files', 'success');
+        renderPinnedList();
+        setupEventListeners();
+        updateFilterButtons();
+
+        lucide.createIcons();
       } catch (e) {
-        toast(e.message, 'error');
+        toast('Error: ' + e.message, 'error');
       }
     }
 
-    function getFileByPath(path) {
-      return state.files.find(f => f.path === path);
-    }
+    function setupEventListeners() {
+      document.getElementById('openSidebarBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.add('open');
+        document.getElementById('sidebarOverlay').classList.add('open');
+      });
 
-    document.getElementById('openSidebarBtn').addEventListener('click', openSidebar);
-    document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
-    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
-    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
+      document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+      });
 
-    document.getElementById('sortDropdown').addEventListener('change', e => {
-      state.sortBy = e.target.value;
-      saveSortPreference();
-      renderFiles();
-    });
+      document.getElementById('sidebarOverlay').addEventListener('click', () => {
+        document.getElementById('sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('open');
+      });
 
-    document.getElementById('gridViewBtn').addEventListener('click', () => {
-      state.viewMode = 'grid';
-      saveViewPreference();
-      document.getElementById('gridViewBtn').classList.add('active');
-      document.getElementById('listViewBtn').classList.remove('active');
-      renderFiles();
-    });
+      document.getElementById('sidebarRefresh').addEventListener('click', init);
 
-    document.getElementById('listViewBtn').addEventListener('click', () => {
-      state.viewMode = 'list';
-      saveViewPreference();
-      document.getElementById('listViewBtn').classList.add('active');
-      document.getElementById('gridViewBtn').classList.remove('active');
-      renderFiles();
-    });
+      document.getElementById('refreshBtn').addEventListener('click', init);
 
-    document.getElementById('sortDropdown').value = state.sortBy;
-    if (state.viewMode === 'list') {
-      document.getElementById('listViewBtn').classList.add('active');
-      document.getElementById('gridViewBtn').classList.remove('active');
-    }
-
-    document.getElementById('searchInput').addEventListener('input', e => {
-      state.searchQuery = e.target.value;
-      renderFiles();
-      updateFileCount();
-    });
-
-    document.getElementById('clearSearchBtn').addEventListener('click', () => {
-      document.getElementById('searchInput').value = '';
-      state.searchQuery = '';
-      renderFiles();
-      updateFileCount();
-    });
-
-    document.getElementById('tabBar').addEventListener('click', e => {
-      const btn = e.target.closest('.tab-item');
-      if (btn) {
-        state.activeTab = btn.getAttribute('data-tab');
-        renderTabs();
+      document.getElementById('sortDropdown').addEventListener('change', (e) => {
+        state.sortBy = e.target.value;
+        state.filters.pinned = false;
+        state.filters.size = false;
+        state.filters.modified = false;
+        saveSortPreference();
+        saveFilterPreferences();
         renderFiles();
-        updateFileCount();
-      }
-    });
+        updateFilterButtons();
+      });
 
-    document.getElementById('fileGrid').addEventListener('click', e => {
-      const pinBtn = e.target.closest('.pin-btn');
-      if (pinBtn) {
-        e.stopPropagation();
-        togglePin(pinBtn.getAttribute('data-pin'));
-        return;
-      }
-
-      const dlBtn = e.target.closest('.download-btn');
-      if (dlBtn) {
-        e.stopPropagation();
-        const file = getFileByPath(dlBtn.getAttribute('data-download'));
-        if (file) downloadFile(file);
-        return;
-      }
-
-      const fileBtn = e.target.closest('.file-btn');
-      if (fileBtn) {
-        const file = getFileByPath(fileBtn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
-    });
-
-    document.getElementById('fileGrid').addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const fileBtn = e.target.closest('.file-btn');
-        if (fileBtn) {
-          const file = getFileByPath(fileBtn.getAttribute('data-run'));
-          if (file) runFile(file);
+      document.getElementById('pinnedFilterBtn').addEventListener('click', () => {
+        if (state.filters.pinned) {
+          state.filters.pinnedReversed = !state.filters.pinnedReversed;
+        } else {
+          state.filters.pinned = true;
+          state.filters.pinnedReversed = false;
+          state.filters.size = false;
+          state.filters.modified = false;
         }
-      }
-    });
+        saveFilterPreferences();
+        renderFiles();
+        updateFilterButtons();
+      });
 
-    document.getElementById('pinnedList').addEventListener('dragstart', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        state.draggedPinIndex = parseInt(btn.getAttribute('data-pinned-idx'));
-        btn.classList.add('dragging');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragend', e => {
-      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('dragging', 'drag-over'));
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragover', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.add('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragleave', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.remove('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('drop', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && state.draggedPinIndex !== null) {
-        const targetIdx = parseInt(btn.getAttribute('data-pinned-idx'));
-        const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
-        
-        if (state.draggedPinIndex !== targetIdx) {
-          const draggedPin = state.pinned[state.draggedPinIndex];
-          state.pinned.splice(state.draggedPinIndex, 1);
-          state.pinned.splice(targetIdx, 0, draggedPin);
-          savePins();
-          renderPinned();
+      document.getElementById('sizeFilterBtn').addEventListener('click', () => {
+        if (state.filters.size) {
+          state.filters.sizeReversed = !state.filters.sizeReversed;
+        } else {
+          state.filters.size = true;
+          state.filters.sizeReversed = false;
+          state.filters.pinned = false;
+          state.filters.modified = false;
         }
-      }
-    });
+        saveFilterPreferences();
+        renderFiles();
+        updateFilterButtons();
+      });
 
-    document.getElementById('pinnedList').addEventListener('click', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && !e.target.closest('[data-pinned-idx]')) {
-        const file = getFileByPath(btn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
-    });
+      document.getElementById('modifiedFilterBtn').addEventListener('click', () => {
+        if (state.filters.modified) {
+          state.filters.modifiedReversed = !state.filters.modifiedReversed;
+        } else {
+          state.filters.modified = true;
+          state.filters.modifiedReversed = false;
+          state.filters.pinned = false;
+          state.filters.size = false;
+        }
+        saveFilterPreferences();
+        renderFiles();
+        updateFilterButtons();
+      });
 
-    loadPins();
-    loadPreferences();
-    refreshRepo();
+      document.getElementById('gridViewBtn').addEventListener('click', () => {
+        state.viewMode = 'grid';
+        saveViewPreference();
+        document.getElementById('fileGrid').classList.remove('list-view');
+        document.getElementById('gridViewBtn').classList.add('active');
+        document.getElementById('listViewBtn').classList.remove('active');
+      });
+
+      document.getElementById('listViewBtn').addEventListener('click', () => {
+        state.viewMode = 'list';
+        saveViewPreference();
+        document.getElementById('fileGrid').classList.add('list-view');
+        document.getElementById('listViewBtn').classList.add('active');
+        document.getElementById('gridViewBtn').classList.remove('active');
+      });
+
+      if (state.viewMode === 'list') {
+        document.getElementById('fileGrid').classList.add('list-view');
+        document.getElementById('listViewBtn').classList.add('active');
+        document.getElementById('gridViewBtn').classList.remove('active');
+      }
+
+      document.getElementById('searchInput').addEventListener('input', (e) => {
+        state.searchQuery = e.target.value;
+        renderFiles();
+      });
+
+      document.getElementById('clearSearchBtn').addEventListener('click', () => {
+        state.searchQuery = '';
+        document.getElementById('searchInput').value = '';
+        renderFiles();
+      });
+    }
+
+    function updateFilterButtons() {
+      const pinnedBtn = document.getElementById('pinnedFilterBtn');
+      const sizeBtn = document.getElementById('sizeFilterBtn');
+      const modifiedBtn = document.getElementById('modifiedFilterBtn');
+
+      pinnedBtn.classList.toggle('active', state.filters.pinned);
+      pinnedBtn.classList.toggle('reversed', state.filters.pinnedReversed);
+
+      sizeBtn.classList.toggle('active', state.filters.size);
+      sizeBtn.classList.toggle('reversed', state.filters.sizeReversed);
+
+      modifiedBtn.classList.toggle('active', state.filters.modified);
+      modifiedBtn.classList.toggle('reversed', state.filters.modifiedReversed);
+    }
+
+    init();
   </script>
 </body>
 
