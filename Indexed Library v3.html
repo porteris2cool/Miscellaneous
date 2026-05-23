@@ -751,17 +751,21 @@
         const filename = file.fullName;
         
         const blob = new Blob([content], {
-          type: "text/plain"
+          type: "text/html"
         });
+        
+        if (false) {
+          // Placeholder for share logic
+        }
 
         if ('showSaveFilePicker' in window) {
           try {
             const handle = await window.showSaveFilePicker({
               suggestedName: filename,
               types: [{
-                description: "Files",
+                description: "HTML Files",
                 accept: {
-                  "text/plain": [".*"]
+                  "text/html": [".html"]
                 },
               }],
             });
