@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- By Ion-o-koji -->
 <html lang="en">
 
 <head>
@@ -137,7 +136,7 @@
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23fff' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 128px 128px;
     }
 
@@ -275,10 +274,9 @@
       }
     }
 
-    .file-btn .pin-btn {
+    .file-btn .action-btn {
       position: absolute;
       top: 6px;
-      right: 6px;
       width: 24px;
       height: 24px;
       display: flex;
@@ -289,22 +287,25 @@
       background: transparent;
       cursor: pointer;
       color: var(--muted);
-      opacity: 0;
+      opacity: 1;
       transition: all 0.2s;
       z-index: 2;
     }
 
-    .file-btn:hover .pin-btn,
-    .file-btn .pin-btn.pinned {
-      opacity: 1;
+    .file-btn .pin-btn {
+      right: 32px;
     }
 
-    .file-btn .pin-btn.pinned {
+    .file-btn .download-btn {
+      right: 6px;
+    }
+
+    .file-btn .action-btn:hover {
+      background: var(--accent-dim);
       color: var(--accent);
     }
 
-    .file-btn .pin-btn:hover {
-      background: var(--accent-dim);
+    .file-btn .action-btn.pinned {
       color: var(--accent);
     }
 
@@ -601,9 +602,8 @@
     </div>
   </aside>
 
-  <!-- Main screen -->
   <div id="mainScreen" style="position:relative; z-index:1; min-height:100vh;">
-    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); position:sticky; top:0; z-index:30;">
+    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); position:sticky; top:0; z-index:10;">
       <div style="display:flex; align-items:center; gap:12px;">
         <button id="openSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;" aria-label="Open menu">
           <i data-lucide="menu" style="width:22px; height:22px;"></i>
@@ -632,7 +632,6 @@
   </div>
 
   <script>
-    // ==================== STATE ====================
     const state = {
       owner: 'Ion-o-koji',
       repo: 'Ion-o-koji-s-Index',
@@ -646,7 +645,6 @@
 
     const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
 
-    // ==================== PERSISTENCE (pins only) ====================
     function savePins() {
       localStorage.setItem('Ion-o-koji_pins', JSON.stringify(state.pinned));
     }
@@ -658,7 +656,6 @@
       } catch (e) {}
     }
 
-    // ==================== TOAST ====================
     function toast(msg, type = 'info') {
       const c = document.getElementById('toastContainer');
       const el = document.createElement('div');
@@ -668,7 +665,6 @@
       setTimeout(() => el.remove(), 3000);
     }
 
-    // ==================== GITHUB API ====================
     async function fetchDefaultBranch(owner, repo) {
       const url = `https://api.github.com/repos/${owner}/${repo}`;
       const res = await fetch(url);
@@ -696,7 +692,6 @@
       return res.text();
     }
 
-    // ==================== PARSE TREE ====================
     function parseTree(tree) {
       const files = [];
       const folderSet = new Set();
@@ -732,7 +727,6 @@
       };
     }
 
-    // ==================== FILE TYPE HELPERS ====================
     function fileIcon(ext) {
       if (['html', 'htm'].includes(ext)) return 'globe';
       if (['md', 'markdown'].includes(ext)) return 'file-text';
@@ -751,7 +745,55 @@
       return ext.toUpperCase();
     }
 
-    // ==================== RUN FILE ====================
+    async function downloadFile(file) {
+      try {
+        const content = await fetchFileContent(file.path);
+        const filename = file.fullName;
+        
+        const blob = new Blob([content], {
+          type: "text/plain"
+        });
+
+        if ('showSaveFilePicker' in window) {
+          try {
+            const handle = await window.showSaveFilePicker({
+              suggestedName: filename,
+              types: [{
+                description: "Files",
+                accept: {
+                  "text/plain": [".*"]
+                },
+              }],
+            });
+            const writable = await handle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            toast('File saved', 'success');
+            return;
+          } catch (err) {
+            if (err.name === 'AbortError') return;
+          }
+        }
+
+        try {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          toast('File saved', 'success');
+          return;
+        } catch (err) {
+          toast('Download failed', 'error');
+        }
+      } catch (e) {
+        toast('Failed: ' + e.message, 'error');
+      }
+    }
+
     async function runFile(file) {
       try {
         const content = await fetchFileContent(file.path);
@@ -822,7 +864,6 @@ p{margin:0.5em 0;}
 </style></head><body><p>${html}</p></body></html>`;
     }
 
-    // ==================== PIN MANAGEMENT ====================
     function togglePin(path) {
       const idx = state.pinned.indexOf(path);
       if (idx === -1) {
@@ -837,7 +878,6 @@ p{margin:0.5em 0;}
       renderFiles();
     }
 
-    // ==================== SIDEBAR ====================
     function openSidebar() {
       document.getElementById('sidebar').classList.add('open');
       document.getElementById('sidebarOverlay').classList.add('open');
@@ -848,7 +888,6 @@ p{margin:0.5em 0;}
       document.getElementById('sidebarOverlay').classList.remove('open');
     }
 
-    // ==================== RENDERING ====================
     function renderTabs() {
       const bar = document.getElementById('tabBar');
       let h = '';
@@ -911,8 +950,11 @@ p{margin:0.5em 0;}
         const label = extLabel(file.extension);
         const delay = Math.min(i * 30, 400);
         h += `<div class="file-btn" data-run="${file.path}" style="animation-delay:${delay}ms;" tabindex="0" role="button" aria-label="Run ${file.fullName}">
-            <button class="pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
+            <button class="action-btn pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
                 <i data-lucide="${pinned?'pin-off':'pin'}" style="width:13px; height:13px;"></i>
+            </button>
+            <button class="action-btn download-btn" data-download="${file.path}" aria-label="Download ${file.fullName}" title="Download">
+                <i data-lucide="download" style="width:13px; height:13px;"></i>
             </button>
             <i data-lucide="${icon}" class="file-icon" style="color:${col};"></i>
             <span class="file-name">${escHtml(file.name)}</span>
@@ -968,7 +1010,6 @@ p{margin:0.5em 0;}
       el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
     }
 
-    // ==================== LOAD ====================
     async function refreshRepo() {
       closeSidebar();
       showLoading();
@@ -998,49 +1039,24 @@ p{margin:0.5em 0;}
       }
     }
 
-    // ==================== EVENT LISTENERS ====================
+    function getFileByPath(path) {
+      return state.files.find(f => f.path === path);
+    }
+
     document.getElementById('openSidebarBtn').addEventListener('click', openSidebar);
     document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
     document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
     document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
+    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
 
     document.getElementById('tabBar').addEventListener('click', e => {
-      const tab = e.target.closest('.tab-item');
-      if (!tab) return;
-      state.activeTab = tab.dataset.tab;
-      renderTabs();
-      renderFiles();
-      updateFileCount();
-    });
-
-    document.getElementById('fileGrid').addEventListener('click', e => {
-      const pinBtn = e.target.closest('.pin-btn');
-      if (pinBtn) {
-        e.stopPropagation();
-        togglePin(pinBtn.dataset.pin);
-        return;
+      const btn = e.target.closest('.tab-item');
+      if (btn) {
+        state.activeTab = btn.getAttribute('data-tab');
+        renderTabs();
+        renderFiles();
+        updateFileCount();
       }
-      const fileBtn = e.target.closest('.file-btn');
-      if (fileBtn && fileBtn.dataset.run) {
-        const file = state.files.find(f => f.path === fileBtn.dataset.run);
-        if (file) runFile(file);
-      }
-    });
-
-    document.getElementById('fileGrid').addEventListener('keydown', e => {
-      if (e.key === 'Enter' && e.target.classList.contains('file-btn') && e.target.dataset.run) {
-        const file = state.files.find(f => f.path === e.target.dataset.run);
-        if (file) runFile(file);
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('click', e => {
-      const item = e.target.closest('.sidebar-item');
-      if (!item || !item.dataset.run) return;
-      closeSidebar();
-      const file = state.files.find(f => f.path === item.dataset.run);
-      if (file) runFile(file);
     });
 
     document.getElementById('searchInput').addEventListener('input', e => {
@@ -1049,27 +1065,50 @@ p{margin:0.5em 0;}
       updateFileCount();
     });
 
-    document.addEventListener('keydown', e => {
-      if (e.key === 'Escape') closeSidebar();
+    document.getElementById('fileGrid').addEventListener('click', e => {
+      const pinBtn = e.target.closest('.pin-btn');
+      if (pinBtn) {
+        e.stopPropagation();
+        togglePin(pinBtn.getAttribute('data-pin'));
+        return;
+      }
+
+      const dlBtn = e.target.closest('.download-btn');
+      if (dlBtn) {
+        e.stopPropagation();
+        const file = getFileByPath(dlBtn.getAttribute('data-download'));
+        if (file) downloadFile(file);
+        return;
+      }
+
+      const fileBtn = e.target.closest('.file-btn');
+      if (fileBtn) {
+        const file = getFileByPath(fileBtn.getAttribute('data-run'));
+        if (file) runFile(file);
+      }
     });
 
-    // ==================== INIT ====================
-    function init() {
-      lucide.createIcons();
-      loadPins();
-      refreshRepo();
-    }
+    document.getElementById('fileGrid').addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const fileBtn = e.target.closest('.file-btn');
+        if (fileBtn) {
+          const file = getFileByPath(fileBtn.getAttribute('data-run'));
+          if (file) runFile(file);
+        }
+      }
+    });
 
-    init();
+    document.getElementById('pinnedList').addEventListener('click', e => {
+      const btn = e.target.closest('.sidebar-item');
+      if (btn) {
+        const file = getFileByPath(btn.getAttribute('data-run'));
+        if (file) runFile(file);
+      }
+    });
 
-    (() => {
-      const ENTRY = 'Indexed Library v3',
-        KEY = 'Ion-o-koji Watermark';
-      const logs = (localStorage.getItem(KEY) || "").split('\n').map(line => line.replace(/^- /, '').trim()).filter(line => line && line !== ENTRY);
-      logs.push(ENTRY);
-      localStorage.setItem(KEY, logs.map(item => `- ${item}`).join('\n'));
-    })();
-
+    loadPins();
+    refreshRepo();
   </script>
 </body>
 
