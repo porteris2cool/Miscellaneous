@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<!-- By Ion-o-koji -->
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Indexed Library v3</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Space Grotesk', 'sans-serif'],
+            body: ['DM Sans', 'sans-serif'],
+          }
+        }
+      }
+    }
+
+  </script>
+  <style>
+    :root {
+      --bg: #08090A;
+      --surface: #111214;
+      --card: #191B1E;
+      --card-hover: #1F2125;
+      --border: #282A2E;
+      --border-hi: #3A3D42;
+      --fg: #EAEAED;
+      --muted: #6E7078;
+      --accent: #F5A623;
+      --accent-dim: rgba(245, 166, 35, 0.1);
+      --accent-glow: rgba(245, 166, 35, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(100px);
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .bg-orb-1 {
+      width: 500px;
+      height: 500px;
+      background: var(--accent);
+      top: -150px;
+      left: -120px;
+      animation: orb1 22s ease-in-out infinite;
+    }
+
+    .bg-orb-2 {
+      width: 350px;
+      height: 350px;
+      background: #E8614D;
+      bottom: -80px;
+      right: -80px;
+      animation: orb2 28s ease-in-out infinite;
+    }
+
+    .bg-orb-3 {
+      width: 250px;
+      height: 250px;
+      background: #34D399;
+      top: 40%;
+      left: 60%;
+      animation: orb3 20s ease-in-out infinite;
+    }
+
+    @keyframes orb1 {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      33% {
+        transform: translate(120px, 100px)
+      }
+
+      66% {
+        transform: translate(-40px, 150px)
+      }
+    }
+
+    @keyframes orb2 {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      33% {
+        transform: translate(-100px, -80px)
+      }
+
+      66% {
+        transform: translate(80px, -120px)
+      }
+    }
+
+    @keyframes orb3 {
+
+      0%,
+      100% {
+        transform: translate(0, 0)
+      }
+
+      50% {
+        transform: translate(-140px, 70px)
+      }
+    }
+
+    .noise-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 128px 128px;
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--muted);
+    }
+
+    .tab-bar {
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      padding: 10px 16px 6px;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-bar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .tab-item {
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      font-family: 'DM Sans', sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tab-item:hover {
+      color: var(--fg);
+      background: var(--card);
+      border-color: var(--border);
+    }
+
+    .tab-item.active {
+      color: var(--bg);
+      background: var(--accent);
+      border-color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tab-count {
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.12);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .tab-item.active .tab-count {
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .file-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+      padding: 8px 16px 100px;
+    }
+
+    .file-btn {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 14px 18px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow: hidden;
+      min-height: 110px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .file-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 14px;
+      background: radial-gradient(circle at 50% 0%, var(--accent-glow), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .file-btn:hover {
+      border-color: var(--accent);
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(245, 166, 35, 0.08);
+    }
+
+    .file-btn:hover::after {
+      opacity: 1;
+    }
+
+    .file-btn:active {
+      transform: translateY(-1px);
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(12px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .file-btn .pin-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--muted);
+      opacity: 0;
+      transition: all 0.2s;
+      z-index: 2;
+    }
+
+    .file-btn:hover .pin-btn,
+    .file-btn .pin-btn.pinned {
+      opacity: 1;
+    }
+
+    .file-btn .pin-btn.pinned {
+      color: var(--accent);
+    }
+
+    .file-btn .pin-btn:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .file-btn .file-icon {
+      width: 30px;
+      height: 30px;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .file-btn .file-name {
+      font-size: 12.5px;
+      font-weight: 600;
+      text-align: center;
+      word-break: break-word;
+      line-height: 1.3;
+      position: relative;
+      z-index: 1;
+      max-width: 100%;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .file-btn .file-ext {
+      font-size: 10px;
+      font-weight: 700;
+      margin-top: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 1;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .sidebar-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 40;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(2px);
+    }
+
+    .sidebar-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .sidebar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 300px;
+      max-width: 85vw;
+      height: 100vh;
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .sidebar.open {
+      transform: translateX(0);
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--fg);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .sidebar-item:hover {
+      border-color: var(--accent);
+      background: var(--card-hover);
+    }
+
+    .sidebar-action {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--fg);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      width: 100%;
+      text-align: left;
+      transition: all 0.2s;
+    }
+
+    .sidebar-action:hover {
+      border-color: var(--border-hi);
+      background: var(--card);
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      padding: 12px 18px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      background: var(--card);
+      border: 1px solid var(--border);
+      color: var(--fg);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 2.5s forwards;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      pointer-events: auto;
+      max-width: 320px;
+    }
+
+    .toast.error {
+      border-color: #E8614D;
+      color: #F0A0A0;
+    }
+
+    .toast.success {
+      border-color: #34D399;
+      color: #A0F0D0;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(16px) scale(0.96)
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1)
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateY(0)
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(8px)
+      }
+    }
+
+    .skeleton {
+      background: linear-gradient(90deg, var(--card) 25%, var(--border) 50%, var(--card) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.5s infinite;
+      border-radius: 14px;
+      min-height: 110px;
+    }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0
+      }
+
+      100% {
+        background-position: -200% 0
+      }
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      color: var(--muted);
+    }
+
+    .search-wrap {
+      position: relative;
+      padding: 0 16px 6px;
+    }
+
+    .search-wrap input {
+      width: 100%;
+      padding: 9px 14px 9px 38px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--fg);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .search-wrap input:focus {
+      border-color: var(--accent);
+    }
+
+    .search-wrap input::placeholder {
+      color: var(--muted);
+    }
+
+    .search-wrap .search-icon {
+      position: absolute;
+      left: 28px;
+      top: 50%;
+      transform: translateY(-55%);
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .file-grid {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 10px;
+        padding: 6px 12px 100px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <div class="bg-orb bg-orb-1"></div>
+  <div class="bg-orb bg-orb-2"></div>
+  <div class="bg-orb bg-orb-3"></div>
+  <div class="noise-overlay"></div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <aside class="sidebar" id="sidebar" role="navigation" aria-label="Main menu">
+    <div style="padding:18px 20px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border);">
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:700;">Menu</h2>
+      <button id="closeSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:4px; border-radius:6px; transition:background 0.2s;" aria-label="Close menu">
+        <i data-lucide="x" style="width:20px; height:20px;"></i>
+      </button>
+    </div>
+    <div style="padding:20px; flex:1; overflow-y:auto;">
+      <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+        <i data-lucide="pin" style="width:14px; height:14px; color:var(--accent);"></i>
+        <span style="font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1.2px; color:var(--muted);">Pinned</span>
+      </div>
+      <div id="pinnedList" style="display:flex; flex-direction:column; gap:6px;"></div>
+      <p id="pinnedEmpty" style="color:var(--muted); font-size:12px; line-height:1.6; padding:4px 0;">
+        No pinned items yet. Hover a file button and tap the pin icon to add it here.
+      </p>
+    </div>
+    <div style="padding:14px 20px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:8px;">
+      <button class="sidebar-action" id="sidebarRefresh">
+        <i data-lucide="refresh-cw" style="width:15px; height:15px; color:var(--muted);"></i>
+        Refresh Repository
+      </button>
+    </div>
+  </aside>
+
+  <!-- Main screen -->
+  <div id="mainScreen" style="position:relative; z-index:1; min-height:100vh;">
+    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); position:sticky; top:0; z-index:30;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <button id="openSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;" aria-label="Open menu">
+          <i data-lucide="menu" style="width:22px; height:22px;"></i>
+        </button>
+        <div>
+          <h1 id="repoTitle" style="font-family:'Space Grotesk',sans-serif; font-size:17px; font-weight:700; line-height:1.2;"></h1>
+          <p id="repoSubtitle" style="font-size:11px; color:var(--muted); margin-top:1px;"></p>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:4px;">
+        <span id="fileCount" style="font-size:11px; color:var(--muted); margin-right:8px; font-weight:500;"></span>
+        <button id="refreshBtn" style="background:none; border:none; color:var(--muted); cursor:pointer; padding:8px; border-radius:8px; transition:all 0.2s;" aria-label="Refresh">
+          <i data-lucide="refresh-cw" style="width:17px; height:17px;"></i>
+        </button>
+      </div>
+    </header>
+
+    <nav class="tab-bar" id="tabBar" role="tablist"></nav>
+
+    <div class="search-wrap">
+      <i data-lucide="search" class="search-icon" style="width:15px; height:15px;"></i>
+      <input type="text" id="searchInput" placeholder="Search files..." spellcheck="false">
+    </div>
+
+    <main class="file-grid" id="fileGrid"></main>
+  </div>
+
+  <script>
+    // ==================== STATE ====================
+    const state = {
+      owner: 'Ion-o-koji',
+      repo: 'Ion-o-koji-s-Index',
+      branch: '',
+      files: [],
+      folders: [],
+      activeTab: '',
+      pinned: [],
+      searchQuery: '',
+    };
+
+    const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
+
+    // ==================== PERSISTENCE (pins only) ====================
+    function savePins() {
+      localStorage.setItem('Ion-o-koji_pins', JSON.stringify(state.pinned));
+    }
+
+    function loadPins() {
+      try {
+        const d = JSON.parse(localStorage.getItem('Ion-o-koji_pins'));
+        if (d && Array.isArray(d)) state.pinned = d;
+      } catch (e) {}
+    }
+
+    // ==================== TOAST ====================
+    function toast(msg, type = 'info') {
+      const c = document.getElementById('toastContainer');
+      const el = document.createElement('div');
+      el.className = 'toast ' + type;
+      el.textContent = msg;
+      c.appendChild(el);
+      setTimeout(() => el.remove(), 3000);
+    }
+
+    // ==================== GITHUB API ====================
+    async function fetchDefaultBranch(owner, repo) {
+      const url = `https://api.github.com/repos/${owner}/${repo}`;
+      const res = await fetch(url);
+      if (res.status === 404) throw new Error('Repository not found.');
+      if (res.status === 403) throw new Error('GitHub API rate limit hit. Wait a minute and try again.');
+      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
+      const data = await res.json();
+      if (data.private) throw new Error('This repository is private.');
+      return data.default_branch;
+    }
+
+    async function fetchTree(owner, repo, branch) {
+      const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch repository tree: ' + res.status);
+      const data = await res.json();
+      if (data.truncated) toast('Large repo — some files may be missing', 'error');
+      return data.tree.filter(i => i.type === 'blob');
+    }
+
+    async function fetchFileContent(path) {
+      const url = `https://raw.githubusercontent.com/${state.owner}/${state.repo}/${state.branch}/${path}`;
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Failed to fetch file');
+      return res.text();
+    }
+
+    // ==================== PARSE TREE ====================
+    function parseTree(tree) {
+      const files = [];
+      const folderSet = new Set();
+
+      for (const item of tree) {
+        const parts = item.path.split('/');
+        if (parts.some(p => p.startsWith('.'))) continue;
+
+        const name = parts[parts.length - 1];
+        const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
+
+        if (!ALLOWED_EXT.includes(ext)) continue;
+
+        const folder = parts.length > 1 ? parts.slice(0, -1).join('/') : '';
+
+        files.push({
+          name: name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name,
+          fullName: name,
+          path: item.path,
+          extension: ext,
+          folder,
+        });
+
+        for (let i = 1; i < parts.length; i++) {
+          folderSet.add(parts.slice(0, i).join('/'));
+        }
+      }
+
+      const folders = Array.from(folderSet).sort();
+      return {
+        files,
+        folders
+      };
+    }
+
+    // ==================== FILE TYPE HELPERS ====================
+    function fileIcon(ext) {
+      if (['html', 'htm'].includes(ext)) return 'globe';
+      if (['md', 'markdown'].includes(ext)) return 'file-text';
+      return 'file';
+    }
+
+    function extColor(ext) {
+      if (['html', 'htm'].includes(ext)) return '#E8614D';
+      if (['md', 'markdown'].includes(ext)) return '#9CA3AF';
+      return '#6E7078';
+    }
+
+    function extLabel(ext) {
+      if (['html', 'htm'].includes(ext)) return 'HTML';
+      if (['md', 'markdown'].includes(ext)) return 'MD';
+      return ext.toUpperCase();
+    }
+
+    // ==================== RUN FILE ====================
+    async function runFile(file) {
+      try {
+        const content = await fetchFileContent(file.path);
+        const ext = file.extension;
+
+        if (['html', 'htm'].includes(ext)) {
+          const w = window.open('about:blank', '_blank');
+          if (!w) {
+            toast('Pop-up blocked — allow pop-ups for this site', 'error');
+            return;
+          }
+          w.document.open();
+          w.document.write(content);
+          w.document.close();
+        } else if (['md', 'markdown'].includes(ext)) {
+          const html = renderMarkdown(content, file.fullName);
+          const w = window.open('about:blank', '_blank');
+          if (!w) {
+            toast('Pop-up blocked — allow pop-ups for this site', 'error');
+            return;
+          }
+          w.document.open();
+          w.document.write(html);
+          w.document.close();
+        }
+
+        toast('Launching ' + file.fullName, 'success');
+      } catch (e) {
+        toast('Failed: ' + e.message, 'error');
+      }
+    }
+
+    function renderMarkdown(md, title) {
+      let html = md
+        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
+        .replace(/`([^`]+)`/g, '<code>$1</code>')
+        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
+        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;">')
+        .replace(/^---$/gm, '<hr>')
+        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
+        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
+        .replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
+        .replace(/\n{2,}/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+
+      return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>${title}</title>
+<style>
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:32px 24px;background:#0c0c0d;color:#e4e4e7;line-height:1.75;}
+h1{color:#F5A623;font-size:1.8em;margin:1.2em 0 0.4em;border-bottom:1px solid #222;padding-bottom:0.3em;}
+h2{color:#F5A623;font-size:1.4em;margin:1em 0 0.4em;}
+h3{color:#d4d4d8;font-size:1.15em;margin:0.8em 0 0.3em;}
+h4{color:#a1a1aa;font-size:1em;margin:0.6em 0 0.2em;}
+a{color:#F5A623;}code{background:#1a1a1e;padding:2px 7px;border-radius:4px;font-size:0.88em;color:#F5A623;}
+pre{background:#111214;padding:16px;border-radius:10px;overflow-x:auto;border:1px solid #282A2E;}
+pre code{background:none;padding:0;color:#d4d4d8;font-size:0.85em;}
+ul,ol{padding-left:24px;}li{margin:4px 0;}
+hr{border:none;border-top:1px solid #282A2E;margin:1.5em 0;}
+img{border-radius:8px;}
+p{margin:0.5em 0;}
+</style></head><body><p>${html}</p></body></html>`;
+    }
+
+    // ==================== PIN MANAGEMENT ====================
+    function togglePin(path) {
+      const idx = state.pinned.indexOf(path);
+      if (idx === -1) {
+        state.pinned.push(path);
+        toast('Pinned', 'success');
+      } else {
+        state.pinned.splice(idx, 1);
+        toast('Unpinned');
+      }
+      savePins();
+      renderPinned();
+      renderFiles();
+    }
+
+    // ==================== SIDEBAR ====================
+    function openSidebar() {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebarOverlay').classList.add('open');
+    }
+
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+
+    // ==================== RENDERING ====================
+    function renderTabs() {
+      const bar = document.getElementById('tabBar');
+      let h = '';
+
+      const allCount = state.files.length;
+      h += `<button class="tab-item ${state.activeTab===''?'active':''}" data-tab="" role="tab" aria-selected="${state.activeTab===''}">All <span class="tab-count">${allCount}</span></button>`;
+
+      const foldersWithFiles = state.folders.filter(f => {
+        return state.files.some(fi => fi.folder === f);
+      });
+
+      for (const folder of foldersWithFiles) {
+        const label = folder.split('/').pop();
+        const count = state.files.filter(f => f.folder === folder || f.folder.startsWith(folder + '/')).length;
+        const isActive = state.activeTab === folder;
+        h += `<button class="tab-item ${isActive?'active':''}" data-tab="${folder}" role="tab" aria-selected="${isActive}">${label} <span class="tab-count">${count}</span></button>`;
+      }
+
+      bar.innerHTML = h;
+      lucide.createIcons({
+        nodes: bar.querySelectorAll('[data-lucide]')
+      });
+    }
+
+    function renderFiles() {
+      const grid = document.getElementById('fileGrid');
+      let files = [...state.files];
+
+      if (state.activeTab !== '') {
+        files = files.filter(f => f.folder === state.activeTab || f.folder.startsWith(state.activeTab + '/'));
+      }
+
+      if (state.searchQuery) {
+        const q = state.searchQuery.toLowerCase();
+        files = files.filter(f => f.name.toLowerCase().includes(q) || f.fullName.toLowerCase().includes(q) || f.path.toLowerCase().includes(q));
+      }
+
+      if (files.length === 0) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
+            <i data-lucide="folder-open" style="width:48px; height:48px; margin-bottom:14px; opacity:0.25;"></i>
+            <p style="font-size:15px; font-weight:600; margin-bottom:4px;">No files found</p>
+            <p style="font-size:12px;">Try a different tab or search term</p>
+        </div>`;
+        lucide.createIcons();
+        return;
+      }
+
+      files.sort((a, b) => {
+        const ap = state.pinned.includes(a.path) ? 0 : 1;
+        const bp = state.pinned.includes(b.path) ? 0 : 1;
+        if (ap !== bp) return ap - bp;
+        return a.name.localeCompare(b.name);
+      });
+
+      let h = '';
+      files.forEach((file, i) => {
+        const pinned = state.pinned.includes(file.path);
+        const icon = fileIcon(file.extension);
+        const col = extColor(file.extension);
+        const label = extLabel(file.extension);
+        const delay = Math.min(i * 30, 400);
+        h += `<div class="file-btn" data-run="${file.path}" style="animation-delay:${delay}ms;" tabindex="0" role="button" aria-label="Run ${file.fullName}">
+            <button class="pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
+                <i data-lucide="${pinned?'pin-off':'pin'}" style="width:13px; height:13px;"></i>
+            </button>
+            <i data-lucide="${icon}" class="file-icon" style="color:${col};"></i>
+            <span class="file-name">${escHtml(file.name)}</span>
+            <span class="file-ext" style="color:${col}; background:${col}18;">${label}</span>
+        </div>`;
+      });
+
+      grid.innerHTML = h;
+      lucide.createIcons();
+    }
+
+    function renderPinned() {
+      const list = document.getElementById('pinnedList');
+      const empty = document.getElementById('pinnedEmpty');
+      const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
+
+      if (pinnedFiles.length === 0) {
+        list.innerHTML = '';
+        empty.style.display = 'block';
+        return;
+      }
+      empty.style.display = 'none';
+
+      let h = '';
+      for (const file of pinnedFiles) {
+        const icon = fileIcon(file.extension);
+        const col = extColor(file.extension);
+        h += `<button class="sidebar-item" data-run="${file.path}">
+            <i data-lucide="${icon}" style="width:16px; height:16px; color:${col}; flex-shrink:0;"></i>
+            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(file.name)}</span>
+            <i data-lucide="play" style="width:13px; height:13px; color:var(--muted); flex-shrink:0;"></i>
+        </button>`;
+      }
+      list.innerHTML = h;
+      lucide.createIcons();
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function showLoading() {
+      const grid = document.getElementById('fileGrid');
+      let h = '';
+      for (let i = 0; i < 12; i++) h += '<div class="skeleton"></div>';
+      grid.innerHTML = h;
+    }
+
+    function updateFileCount() {
+      const el = document.getElementById('fileCount');
+      let files = state.files;
+      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab || f.folder.startsWith(state.activeTab + '/'));
+      el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
+    }
+
+    // ==================== LOAD ====================
+    async function refreshRepo() {
+      closeSidebar();
+      showLoading();
+      try {
+        const branch = await fetchDefaultBranch(state.owner, state.repo);
+        state.branch = branch;
+
+        const tree = await fetchTree(state.owner, state.repo, branch);
+        const parsed = parseTree(tree);
+        state.files = parsed.files;
+        state.folders = parsed.folders;
+
+        const paths = new Set(state.files.map(f => f.path));
+        state.pinned = state.pinned.filter(p => paths.has(p));
+        savePins();
+
+        document.getElementById('repoTitle').textContent = state.repo;
+        document.getElementById('repoSubtitle').textContent = state.owner + ' / ' + state.branch;
+
+        renderTabs();
+        renderFiles();
+        renderPinned();
+        updateFileCount();
+        toast('Loaded ' + state.files.length + ' files', 'success');
+      } catch (e) {
+        toast(e.message, 'error');
+      }
+    }
+
+    // ==================== EVENT LISTENERS ====================
+    document.getElementById('openSidebarBtn').addEventListener('click', openSidebar);
+    document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
+    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
+    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
+    document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
+
+    document.getElementById('tabBar').addEventListener('click', e => {
+      const tab = e.target.closest('.tab-item');
+      if (!tab) return;
+      state.activeTab = tab.dataset.tab;
+      renderTabs();
+      renderFiles();
+      updateFileCount();
+    });
+
+    document.getElementById('fileGrid').addEventListener('click', e => {
+      const pinBtn = e.target.closest('.pin-btn');
+      if (pinBtn) {
+        e.stopPropagation();
+        togglePin(pinBtn.dataset.pin);
+        return;
+      }
+      const fileBtn = e.target.closest('.file-btn');
+      if (fileBtn && fileBtn.dataset.run) {
+        const file = state.files.find(f => f.path === fileBtn.dataset.run);
+        if (file) runFile(file);
+      }
+    });
+
+    document.getElementById('fileGrid').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && e.target.classList.contains('file-btn') && e.target.dataset.run) {
+        const file = state.files.find(f => f.path === e.target.dataset.run);
+        if (file) runFile(file);
+      }
+    });
+
+    document.getElementById('pinnedList').addEventListener('click', e => {
+      const item = e.target.closest('.sidebar-item');
+      if (!item || !item.dataset.run) return;
+      closeSidebar();
+      const file = state.files.find(f => f.path === item.dataset.run);
+      if (file) runFile(file);
+    });
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      state.searchQuery = e.target.value;
+      renderFiles();
+      updateFileCount();
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeSidebar();
+    });
+
+    // ==================== INIT ====================
+    function init() {
+      lucide.createIcons();
+      loadPins();
+      refreshRepo();
+    }
+
+    init();
+
+    (() => {
+      const ENTRY = 'Indexed Library v3',
+        KEY = 'Ion-o-koji Watermark';
+      const logs = (localStorage.getItem(KEY) || "").split('\n').map(line => line.replace(/^- /, '').trim()).filter(line => line && line !== ENTRY);
+      logs.push(ENTRY);
+      localStorage.setItem(KEY, logs.map(item => `- ${item}`).join('\n'));
+    })();
+
+  </script>
+</body>
+
+</html>
