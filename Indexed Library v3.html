@@ -214,11 +214,70 @@
       background: rgba(0, 0, 0, 0.2);
     }
 
+    .controls-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .sort-dropdown {
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .sort-dropdown:hover {
+      border-color: var(--accent);
+    }
+
+    .view-toggle {
+      display: flex;
+      gap: 4px;
+    }
+
+    .view-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .view-btn:hover {
+      border-color: var(--accent);
+      color: var(--fg);
+    }
+
+    .view-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
     .file-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 12px;
       padding: 8px 16px 100px;
+    }
+
+    .file-grid.list-view {
+      grid-template-columns: 1fr;
     }
 
     .file-btn {
@@ -236,6 +295,28 @@
       overflow: hidden;
       min-height: 110px;
       animation: fadeUp 0.4s ease both;
+    }
+
+    .file-grid.list-view .file-btn {
+      flex-direction: row;
+      justify-content: flex-start;
+      padding: 12px 16px;
+      min-height: auto;
+      gap: 12px;
+    }
+
+    .file-grid.list-view .file-icon {
+      margin-bottom: 0 !important;
+    }
+
+    .file-grid.list-view .file-name {
+      text-align: left;
+      flex: 1;
+    }
+
+    .file-grid.list-view .file-ext {
+      margin-top: 0;
+      margin-left: auto;
     }
 
     .file-btn::after {
@@ -298,6 +379,12 @@
 
     .file-btn .download-btn {
       right: 6px;
+    }
+
+    .file-grid.list-view .action-btn {
+      position: relative;
+      top: auto;
+      right: auto;
     }
 
     .file-btn .action-btn:hover {
@@ -391,10 +478,23 @@
       color: var(--fg);
       font-size: 13px;
       font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
+      cursor: grab;
       width: 100%;
       text-align: left;
       transition: all 0.2s;
+    }
+
+    .sidebar-item:active {
+      cursor: grabbing;
+    }
+
+    .sidebar-item.dragging {
+      opacity: 0.5;
+    }
+
+    .sidebar-item.drag-over {
+      border-color: var(--accent);
+      background: var(--accent-dim);
     }
 
     .sidebar-item:hover {
@@ -545,6 +645,36 @@
       pointer-events: none;
     }
 
+    .search-wrap .clear-btn {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      border-radius: 4px;
+      transition: all 0.2s;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .search-wrap input:not(:placeholder-shown) ~ .clear-btn {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .search-wrap .clear-btn:hover {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
       *,
@@ -560,6 +690,10 @@
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 10px;
         padding: 6px 12px 100px;
+      }
+
+      .controls-bar {
+        flex-wrap: wrap;
       }
     }
 
@@ -623,9 +757,29 @@
 
     <nav class="tab-bar" id="tabBar" role="tablist"></nav>
 
+    <div class="controls-bar">
+      <select id="sortDropdown" class="sort-dropdown">
+        <option value="name">Sort: Name</option>
+        <option value="name-desc">Sort: Name (Z-A)</option>
+        <option value="extension">Sort: Extension</option>
+        <option value="size">Sort: Size</option>
+      </select>
+      <div class="view-toggle">
+        <button id="gridViewBtn" class="view-btn active" title="Grid View">
+          <i data-lucide="grid-3x3" style="width:16px; height:16px;"></i>
+        </button>
+        <button id="listViewBtn" class="view-btn" title="List View">
+          <i data-lucide="list" style="width:16px; height:16px;"></i>
+        </button>
+      </div>
+    </div>
+
     <div class="search-wrap">
       <i data-lucide="search" class="search-icon" style="width:15px; height:15px;"></i>
       <input type="text" id="searchInput" placeholder="Search files..." spellcheck="false">
+      <button id="clearSearchBtn" class="clear-btn" title="Clear search" aria-label="Clear search">
+        <i data-lucide="x" style="width:16px; height:16px;"></i>
+      </button>
     </div>
 
     <main class="file-grid" id="fileGrid"></main>
@@ -641,6 +795,9 @@
       activeTab: '',
       pinned: [],
       searchQuery: '',
+      sortBy: 'name',
+      viewMode: 'grid',
+      draggedPinIndex: null,
     };
 
     const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
@@ -649,11 +806,26 @@
       localStorage.setItem('Ion-o-koji_pins', JSON.stringify(state.pinned));
     }
 
+    function saveSortPreference() {
+      localStorage.setItem('Ion-o-koji_sortBy', state.sortBy);
+    }
+
+    function saveViewPreference() {
+      localStorage.setItem('Ion-o-koji_viewMode', state.viewMode);
+    }
+
     function loadPins() {
       try {
         const d = JSON.parse(localStorage.getItem('Ion-o-koji_pins'));
         if (d && Array.isArray(d)) state.pinned = d;
       } catch (e) {}
+    }
+
+    function loadPreferences() {
+      const sortBy = localStorage.getItem('Ion-o-koji_sortBy');
+      const viewMode = localStorage.getItem('Ion-o-koji_viewMode');
+      if (sortBy) state.sortBy = sortBy;
+      if (viewMode) state.viewMode = viewMode;
     }
 
     function toast(msg, type = 'info') {
@@ -692,6 +864,14 @@
       return res.text();
     }
 
+    async function getFileSize(path) {
+      const url = `https://api.github.com/repos/${state.owner}/${state.repo}/contents/${path}`;
+      const res = await fetch(url);
+      if (!res.ok) return 0;
+      const data = await res.json();
+      return data.size || 0;
+    }
+
     function parseTree(tree) {
       const files = [];
       const folderSet = new Set();
@@ -713,6 +893,7 @@
           path: item.path,
           extension: ext,
           folder,
+          size: item.size || 0,
         });
 
         for (let i = 1; i < parts.length; i++) {
@@ -754,9 +935,7 @@
           type: "text/html"
         });
         
-        if (false) {
-          // Placeholder for share logic
-        }
+        if (false) {}
 
         if ('showSaveFilePicker' in window) {
           try {
@@ -900,12 +1079,12 @@ p{margin:0.5em 0;}
       h += `<button class="tab-item ${state.activeTab===''?'active':''}" data-tab="" role="tab" aria-selected="${state.activeTab===''}">All <span class="tab-count">${allCount}</span></button>`;
 
       const foldersWithFiles = state.folders.filter(f => {
-        return state.files.some(fi => fi.folder === f);
+        return state.files.some(fi => fi.folder === f && !fi.folder.includes(f + '/'));
       });
 
       for (const folder of foldersWithFiles) {
         const label = folder.split('/').pop();
-        const count = state.files.filter(f => f.folder === folder || f.folder.startsWith(folder + '/')).length;
+        const count = state.files.filter(f => f.folder === folder).length;
         const isActive = state.activeTab === folder;
         h += `<button class="tab-item ${isActive?'active':''}" data-tab="${folder}" role="tab" aria-selected="${isActive}">${label} <span class="tab-count">${count}</span></button>`;
       }
@@ -916,12 +1095,34 @@ p{margin:0.5em 0;}
       });
     }
 
+    function sortFiles(files) {
+      const sorted = [...files];
+      
+      if (state.sortBy === 'name') {
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (state.sortBy === 'name-desc') {
+        sorted.sort((a, b) => b.name.localeCompare(a.name));
+      } else if (state.sortBy === 'extension') {
+        sorted.sort((a, b) => {
+          if (a.extension !== b.extension) return a.extension.localeCompare(b.extension);
+          return a.name.localeCompare(b.name);
+        });
+      } else if (state.sortBy === 'size') {
+        sorted.sort((a, b) => {
+          if (a.size !== b.size) return a.size - b.size;
+          return a.name.localeCompare(b.name);
+        });
+      }
+
+      return sorted;
+    }
+
     function renderFiles() {
       const grid = document.getElementById('fileGrid');
       let files = [...state.files];
 
       if (state.activeTab !== '') {
-        files = files.filter(f => f.folder === state.activeTab || f.folder.startsWith(state.activeTab + '/'));
+        files = files.filter(f => f.folder === state.activeTab);
       }
 
       if (state.searchQuery) {
@@ -943,8 +1144,10 @@ p{margin:0.5em 0;}
         const ap = state.pinned.includes(a.path) ? 0 : 1;
         const bp = state.pinned.includes(b.path) ? 0 : 1;
         if (ap !== bp) return ap - bp;
-        return a.name.localeCompare(b.name);
+        return 0;
       });
+
+      files = sortFiles(files);
 
       let h = '';
       files.forEach((file, i) => {
@@ -967,6 +1170,7 @@ p{margin:0.5em 0;}
       });
 
       grid.innerHTML = h;
+      grid.className = state.viewMode === 'list' ? 'file-grid list-view' : 'file-grid';
       lucide.createIcons();
     }
 
@@ -983,15 +1187,16 @@ p{margin:0.5em 0;}
       empty.style.display = 'none';
 
       let h = '';
-      for (const file of pinnedFiles) {
+      pinnedFiles.forEach((file, idx) => {
         const icon = fileIcon(file.extension);
         const col = extColor(file.extension);
-        h += `<button class="sidebar-item" data-run="${file.path}">
+        h += `<button class="sidebar-item" data-run="${file.path}" draggable="true" data-pinned-idx="${idx}">
+            <i data-lucide="drag-handle" style="width:16px; height:16px; color:var(--muted); flex-shrink:0;"></i>
             <i data-lucide="${icon}" style="width:16px; height:16px; color:${col}; flex-shrink:0;"></i>
             <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(file.name)}</span>
             <i data-lucide="play" style="width:13px; height:13px; color:var(--muted); flex-shrink:0;"></i>
         </button>`;
-      }
+      });
       list.innerHTML = h;
       lucide.createIcons();
     }
@@ -1010,7 +1215,7 @@ p{margin:0.5em 0;}
     function updateFileCount() {
       const el = document.getElementById('fileCount');
       let files = state.files;
-      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab || f.folder.startsWith(state.activeTab + '/'));
+      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab);
       el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
     }
 
@@ -1053,6 +1258,47 @@ p{margin:0.5em 0;}
     document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
     document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
 
+    document.getElementById('sortDropdown').addEventListener('change', e => {
+      state.sortBy = e.target.value;
+      saveSortPreference();
+      renderFiles();
+    });
+
+    document.getElementById('gridViewBtn').addEventListener('click', () => {
+      state.viewMode = 'grid';
+      saveViewPreference();
+      document.getElementById('gridViewBtn').classList.add('active');
+      document.getElementById('listViewBtn').classList.remove('active');
+      renderFiles();
+    });
+
+    document.getElementById('listViewBtn').addEventListener('click', () => {
+      state.viewMode = 'list';
+      saveViewPreference();
+      document.getElementById('listViewBtn').classList.add('active');
+      document.getElementById('gridViewBtn').classList.remove('active');
+      renderFiles();
+    });
+
+    document.getElementById('sortDropdown').value = state.sortBy;
+    if (state.viewMode === 'list') {
+      document.getElementById('listViewBtn').classList.add('active');
+      document.getElementById('gridViewBtn').classList.remove('active');
+    }
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      state.searchQuery = e.target.value;
+      renderFiles();
+      updateFileCount();
+    });
+
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      state.searchQuery = '';
+      renderFiles();
+      updateFileCount();
+    });
+
     document.getElementById('tabBar').addEventListener('click', e => {
       const btn = e.target.closest('.tab-item');
       if (btn) {
@@ -1061,12 +1307,6 @@ p{margin:0.5em 0;}
         renderFiles();
         updateFileCount();
       }
-    });
-
-    document.getElementById('searchInput').addEventListener('input', e => {
-      state.searchQuery = e.target.value;
-      renderFiles();
-      updateFileCount();
     });
 
     document.getElementById('fileGrid').addEventListener('click', e => {
@@ -1103,15 +1343,60 @@ p{margin:0.5em 0;}
       }
     });
 
-    document.getElementById('pinnedList').addEventListener('click', e => {
+    document.getElementById('pinnedList').addEventListener('dragstart', e => {
       const btn = e.target.closest('.sidebar-item');
       if (btn) {
+        state.draggedPinIndex = parseInt(btn.getAttribute('data-pinned-idx'));
+        btn.classList.add('dragging');
+      }
+    });
+
+    document.getElementById('pinnedList').addEventListener('dragend', e => {
+      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('dragging', 'drag-over'));
+    });
+
+    document.getElementById('pinnedList').addEventListener('dragover', e => {
+      e.preventDefault();
+      const btn = e.target.closest('.sidebar-item');
+      if (btn) {
+        btn.classList.add('drag-over');
+      }
+    });
+
+    document.getElementById('pinnedList').addEventListener('dragleave', e => {
+      const btn = e.target.closest('.sidebar-item');
+      if (btn) {
+        btn.classList.remove('drag-over');
+      }
+    });
+
+    document.getElementById('pinnedList').addEventListener('drop', e => {
+      e.preventDefault();
+      const btn = e.target.closest('.sidebar-item');
+      if (btn && state.draggedPinIndex !== null) {
+        const targetIdx = parseInt(btn.getAttribute('data-pinned-idx'));
+        const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
+        
+        if (state.draggedPinIndex !== targetIdx) {
+          const draggedPin = state.pinned[state.draggedPinIndex];
+          state.pinned.splice(state.draggedPinIndex, 1);
+          state.pinned.splice(targetIdx, 0, draggedPin);
+          savePins();
+          renderPinned();
+        }
+      }
+    });
+
+    document.getElementById('pinnedList').addEventListener('click', e => {
+      const btn = e.target.closest('.sidebar-item');
+      if (btn && !e.target.closest('[data-pinned-idx]')) {
         const file = getFileByPath(btn.getAttribute('data-run'));
         if (file) runFile(file);
       }
     });
 
     loadPins();
+    loadPreferences();
     refreshRepo();
   </script>
 </body>
