@@ -19,7 +19,6 @@
         }
       }
     }
-
   </script>
   <style>
     :root {
@@ -87,47 +86,20 @@
     }
 
     @keyframes orb1 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      33% {
-        transform: translate(120px, 100px)
-      }
-
-      66% {
-        transform: translate(-40px, 150px)
-      }
+      0%, 100% { transform: translate(0, 0) }
+      33% { transform: translate(120px, 100px) }
+      66% { transform: translate(-40px, 150px) }
     }
 
     @keyframes orb2 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      33% {
-        transform: translate(-100px, -80px)
-      }
-
-      66% {
-        transform: translate(80px, -120px)
-      }
+      0%, 100% { transform: translate(0, 0) }
+      33% { transform: translate(-100px, -80px) }
+      66% { transform: translate(80px, -120px) }
     }
 
     @keyframes orb3 {
-
-      0%,
-      100% {
-        transform: translate(0, 0)
-      }
-
-      50% {
-        transform: translate(-140px, 70px)
-      }
+      0%, 100% { transform: translate(0, 0) }
+      50% { transform: translate(-140px, 70px) }
     }
 
     .noise-overlay {
@@ -136,7 +108,7 @@
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23fff' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23000' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 128px 128px;
     }
 
@@ -158,84 +130,48 @@
       background: var(--muted);
     }
 
-    .tab-bar {
-      display: flex;
-      gap: 4px;
-      overflow-x: auto;
-      padding: 10px 16px 6px;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
-    }
-
-    .tab-bar::-webkit-scrollbar {
-      display: none;
-    }
-
-    .tab-item {
-      padding: 7px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      white-space: nowrap;
-      cursor: pointer;
-      transition: all 0.2s;
-      color: var(--muted);
-      background: transparent;
-      border: 1px solid transparent;
-      font-family: 'DM Sans', sans-serif;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .tab-item:hover {
-      color: var(--fg);
-      background: var(--card);
-      border-color: var(--border);
-    }
-
-    .tab-item.active {
-      color: var(--bg);
-      background: var(--accent);
-      border-color: var(--accent);
-      font-weight: 600;
-    }
-
-    .tab-count {
-      font-size: 10px;
-      padding: 1px 6px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.12);
-      font-weight: 600;
-      line-height: 1.4;
-    }
-
-    .tab-item.active .tab-count {
-      background: rgba(0, 0, 0, 0.2);
-    }
-
     .controls-bar {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
       padding: 10px 16px;
       border-bottom: 1px solid var(--border);
     }
 
-    .sort-dropdown {
-      padding: 6px 12px;
-      background: var(--card);
+    .filter-btn {
+      position: relative;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
       border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--fg);
-      font-size: 12px;
-      font-family: 'DM Sans', sans-serif;
+      background: transparent;
+      color: var(--muted);
       cursor: pointer;
       transition: all 0.2s;
+      font-size: 12px;
+      flex-shrink: 0;
     }
 
-    .sort-dropdown:hover {
+    .filter-btn:hover {
       border-color: var(--accent);
+      color: var(--fg);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .filter-btn .arrow {
+      position: absolute;
+      font-size: 8px;
+      bottom: 1px;
+      right: 1px;
+      opacity: 0.7;
     }
 
     .view-toggle {
@@ -269,11 +205,54 @@
       color: var(--bg);
     }
 
+    .all-files-btn {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 14px;
+    }
+
+    .all-files-btn:hover {
+      border-color: var(--accent);
+      color: var(--fg);
+    }
+
+    .all-files-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: var(--bg);
+    }
+
+    .folder-dropdown {
+      flex: 1;
+      padding: 6px 12px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--fg);
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .folder-dropdown:hover {
+      border-color: var(--accent);
+    }
+
     .file-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
       gap: 12px;
-      padding: 8px 16px 100px;
+      padding: 8px 16px 120px;
     }
 
     .file-grid.list-view {
@@ -348,7 +327,6 @@
         opacity: 0;
         transform: translateY(12px);
       }
-
       to {
         opacity: 1;
         transform: translateY(0);
@@ -402,6 +380,9 @@
       margin-bottom: 10px;
       position: relative;
       z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .file-btn .file-name {
@@ -526,7 +507,7 @@
 
     .toast-container {
       position: fixed;
-      bottom: 20px;
+      bottom: 80px;
       right: 20px;
       z-index: 100;
       display: flex;
@@ -564,7 +545,6 @@
         opacity: 0;
         transform: translateY(16px) scale(0.96)
       }
-
       to {
         opacity: 1;
         transform: translateY(0) scale(1)
@@ -576,7 +556,6 @@
         opacity: 1;
         transform: translateY(0)
       }
-
       to {
         opacity: 0;
         transform: translateY(8px)
@@ -592,13 +571,8 @@
     }
 
     @keyframes shimmer {
-      0% {
-        background-position: 200% 0
-      }
-
-      100% {
-        background-position: -200% 0
-      }
+      0% { background-position: 200% 0 }
+      100% { background-position: -200% 0 }
     }
 
     .empty-state {
@@ -640,18 +614,18 @@
       position: absolute;
       left: 28px;
       top: 50%;
-      transform: translateY(-55%);
+      transform: translateY(-50%);
       color: var(--muted);
       pointer-events: none;
     }
 
     .search-wrap .clear-btn {
       position: absolute;
-      right: 10px;
+      right: 12px;
       top: 50%;
       transform: translateY(-50%);
-      width: 24px;
-      height: 24px;
+      width: 20px;
+      height: 20px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -675,11 +649,127 @@
       color: var(--accent);
     }
 
-    @media (prefers-reduced-motion: reduce) {
+    .scroll-to-top {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--fg);
+      cursor: pointer;
+      transition: all 0.3s;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 80;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
 
-      *,
-      *::before,
-      *::after {
+    .scroll-to-top:hover {
+      border-color: var(--accent);
+      background: var(--card-hover);
+      transform: translateY(-2px);
+    }
+
+    .scroll-to-top.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .file-info-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 60;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+      backdrop-filter: blur(4px);
+    }
+
+    .file-info-modal.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .file-info-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+      animation: slideUp 0.3s ease;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .file-info-card h3 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-info-card .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .file-info-card .info-row:last-child {
+      border-bottom: none;
+    }
+
+    .file-info-card .info-label {
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .file-info-card .info-value {
+      color: var(--fg);
+      font-weight: 600;
+    }
+
+    .file-info-card .close-btn {
+      float: right;
+      background: none;
+      border: none;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 4px;
+      transition: all 0.2s;
+    }
+
+    .file-info-card .close-btn:hover {
+      color: var(--fg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
         animation-duration: 0.01ms !important;
         transition-duration: 0.01ms !important;
       }
@@ -689,14 +779,19 @@
       .file-grid {
         grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
         gap: 10px;
-        padding: 6px 12px 100px;
+        padding: 6px 12px 120px;
       }
 
       .controls-bar {
         flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .folder-dropdown {
+        flex: 1;
+        min-width: 100px;
       }
     }
-
   </style>
 </head>
 
@@ -708,6 +803,20 @@
   <div class="noise-overlay"></div>
 
   <div class="toast-container" id="toastContainer"></div>
+
+  <div class="file-info-modal" id="fileInfoModal">
+    <div class="file-info-card">
+      <button class="close-btn" id="closeInfoBtn" aria-label="Close">
+        <i data-lucide="x" style="width:18px; height:18px;"></i>
+      </button>
+      <h3 id="infoFileName"></h3>
+      <div id="fileInfoContent"></div>
+    </div>
+  </div>
+
+  <button class="scroll-to-top" id="scrollToTopBtn" title="Scroll to top" aria-label="Scroll to top">
+    <i data-lucide="arrow-up" style="width:18px; height:18px;"></i>
+  </button>
 
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
@@ -737,7 +846,7 @@
   </aside>
 
   <div id="mainScreen" style="position:relative; z-index:1; min-height:100vh;">
-    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); position:sticky; top:0; z-index:10;">
+    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px);">
       <div style="display:flex; align-items:center; gap:12px;">
         <button id="openSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;" aria-label="Open menu">
           <i data-lucide="menu" style="width:22px; height:22px;"></i>
@@ -755,25 +864,6 @@
       </div>
     </header>
 
-    <nav class="tab-bar" id="tabBar" role="tablist"></nav>
-
-    <div class="controls-bar">
-      <select id="sortDropdown" class="sort-dropdown">
-        <option value="name">Sort: Name</option>
-        <option value="name-desc">Sort: Name (Z-A)</option>
-        <option value="extension">Sort: Extension</option>
-        <option value="size">Sort: Size</option>
-      </select>
-      <div class="view-toggle">
-        <button id="gridViewBtn" class="view-btn active" title="Grid View">
-          <i data-lucide="grid-3x3" style="width:16px; height:16px;"></i>
-        </button>
-        <button id="listViewBtn" class="view-btn" title="List View">
-          <i data-lucide="list" style="width:16px; height:16px;"></i>
-        </button>
-      </div>
-    </div>
-
     <div class="search-wrap">
       <i data-lucide="search" class="search-icon" style="width:15px; height:15px;"></i>
       <input type="text" id="searchInput" placeholder="Search files..." spellcheck="false">
@@ -782,10 +872,74 @@
       </button>
     </div>
 
+    <div class="controls-bar">
+      <button id="pinFilterBtn" class="filter-btn" title="Pin Filter">
+        <i data-lucide="pin" style="width:14px; height:14px;"></i>
+        <span class="arrow">↓</span>
+      </button>
+      <button id="sizeFilterBtn" class="filter-btn" title="Filter by Size">
+        <i data-lucide="arrow-up-down" style="width:12px; height:12px;"></i>
+        <span class="arrow">↓</span>
+      </button>
+      <button id="dateFilterBtn" class="filter-btn" title="Recently Modified">
+        <i data-lucide="clock" style="width:14px; height:14px;"></i>
+        <span class="arrow">↓</span>
+      </button>
+      <div class="view-toggle">
+        <button id="allFilesBtn" class="all-files-btn active" title="All Files">
+          <i data-lucide="files" style="width:16px; height:16px;"></i>
+        </button>
+        <button id="gridViewBtn" class="view-btn active" title="Grid View">
+          <i data-lucide="grid-3x3" style="width:16px; height:16px;"></i>
+        </button>
+        <button id="listViewBtn" class="view-btn" title="List View">
+          <i data-lucide="list" style="width:16px; height:16px;"></i>
+        </button>
+      </div>
+      <select id="folderDropdown" class="folder-dropdown">
+        <option value="">All Folders</option>
+      </select>
+    </div>
+
     <main class="file-grid" id="fileGrid"></main>
   </div>
 
   <script>
+    // Fuzzy search implementation
+    function fuzzyMatch(haystack, needle) {
+      const hlen = haystack.length;
+      const nlen = needle.length;
+      if (nlen > hlen) return false;
+      if (nlen === hlen) return haystack === needle;
+
+      let j = 0;
+      for (let i = 0; i < hlen && j < nlen; i++) {
+        if (haystack[i] === needle[j]) j++;
+      }
+      return j === nlen;
+    }
+
+    function fuzzySearch(query, items, key) {
+      if (!query) return items;
+      const q = query.toLowerCase();
+      return items.filter(item => {
+        const text = item[key].toLowerCase();
+        return fuzzyMatch(text, q);
+      });
+    }
+
+    // Folder icons mapping
+    const folderIcons = {
+      'tools': 'wrench',
+      'games': 'gamepad2',
+      'projects': 'briefcase',
+      'assets': 'image',
+      'docs': 'book',
+      'code': 'code',
+      'media': 'play-circle',
+      'data': 'database'
+    };
+
     const state = {
       owner: 'Ion-o-koji',
       repo: 'Ion-o-koji-s-Index',
@@ -798,20 +952,19 @@
       sortBy: 'name',
       viewMode: 'grid',
       draggedPinIndex: null,
+      filterPins: false,
+      filterBySize: false,
+      filterByDate: false,
+      sortAscending: { pins: false, size: true, date: true },
+      selectedFolder: '',
+      fileMetadata: {},
+      isLoading: false,
     };
 
     const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
 
     function savePins() {
       localStorage.setItem('Ion-o-koji_pins', JSON.stringify(state.pinned));
-    }
-
-    function saveSortPreference() {
-      localStorage.setItem('Ion-o-koji_sortBy', state.sortBy);
-    }
-
-    function saveViewPreference() {
-      localStorage.setItem('Ion-o-koji_viewMode', state.viewMode);
     }
 
     function loadPins() {
@@ -822,10 +975,19 @@
     }
 
     function loadPreferences() {
-      const sortBy = localStorage.getItem('Ion-o-koji_sortBy');
-      const viewMode = localStorage.getItem('Ion-o-koji_viewMode');
-      if (sortBy) state.sortBy = sortBy;
-      if (viewMode) state.viewMode = viewMode;
+      const prefs = localStorage.getItem('Ion-o-koji_prefs');
+      if (prefs) {
+        const p = JSON.parse(prefs);
+        if (p.sortBy) state.sortBy = p.sortBy;
+        if (p.viewMode) state.viewMode = p.viewMode;
+      }
+    }
+
+    function savePreferences() {
+      localStorage.setItem('Ion-o-koji_prefs', JSON.stringify({
+        sortBy: state.sortBy,
+        viewMode: state.viewMode
+      }));
     }
 
     function toast(msg, type = 'info') {
@@ -864,12 +1026,20 @@
       return res.text();
     }
 
-    async function getFileSize(path) {
-      const url = `https://api.github.com/repos/${state.owner}/${state.repo}/contents/${path}`;
-      const res = await fetch(url);
-      if (!res.ok) return 0;
-      const data = await res.json();
-      return data.size || 0;
+    async function getFileMetadata(path) {
+      try {
+        const url = `https://api.github.com/repos/${state.owner}/${state.repo}/commits?path=${path}&per_page=1`;
+        const res = await fetch(url);
+        if (!res.ok) return null;
+        const commits = await res.json();
+        if (commits.length > 0) {
+          return {
+            lastModified: new Date(commits[0].commit.author.date),
+            author: commits[0].commit.author.name
+          };
+        }
+      } catch (e) {}
+      return null;
     }
 
     function parseTree(tree) {
@@ -894,6 +1064,8 @@
           extension: ext,
           folder,
           size: item.size || 0,
+          sha: item.sha,
+          type: 'file'
         });
 
         for (let i = 1; i < parts.length; i++) {
@@ -902,13 +1074,18 @@
       }
 
       const folders = Array.from(folderSet).sort();
-      return {
-        files,
-        folders
-      };
+      return { files, folders };
     }
 
-    function fileIcon(ext) {
+    function getFolderIcon(folderName) {
+      const lower = folderName.toLowerCase();
+      for (const [key, icon] of Object.entries(folderIcons)) {
+        if (lower.includes(key)) return icon;
+      }
+      return 'folder';
+    }
+
+    function fileIcon(ext, folder = '') {
       if (['html', 'htm'].includes(ext)) return 'globe';
       if (['md', 'markdown'].includes(ext)) return 'file-text';
       return 'file';
@@ -926,27 +1103,35 @@
       return ext.toUpperCase();
     }
 
+    function formatFileSize(bytes) {
+      if (!bytes) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+
+    function getRelativeTime(date) {
+      const seconds = Math.floor((new Date() - date) / 1000);
+      if (seconds < 60) return 'just now';
+      if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
+      if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
+      if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
+      return Math.floor(seconds / 604800) + 'w ago';
+    }
+
     async function downloadFile(file) {
       try {
         const content = await fetchFileContent(file.path);
         const filename = file.fullName;
         
-        const blob = new Blob([content], {
-          type: "text/html"
-        });
-        
-        if (false) {}
+        const blob = new Blob([content], { type: "text/html" });
 
         if ('showSaveFilePicker' in window) {
           try {
             const handle = await window.showSaveFilePicker({
               suggestedName: filename,
-              types: [{
-                description: "HTML Files",
-                accept: {
-                  "text/html": [".html"]
-                },
-              }],
+              types: [{ description: "Files", accept: { "*/*": [".html", ".md"] } }],
             });
             const writable = await handle.createWritable();
             await writable.write(blob);
@@ -968,7 +1153,6 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           toast('File saved', 'success');
-          return;
         } catch (err) {
           toast('Download failed', 'error');
         }
@@ -992,7 +1176,7 @@
           w.document.write(content);
           w.document.close();
         } else if (['md', 'markdown'].includes(ext)) {
-          const html = renderMarkdown(content, file.fullName);
+          const html = `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#f5f5f5}pre{background:#333;color:#0f0;padding:15px;border-radius:5px;overflow-x:auto}</style></head><body><h1>${file.fullName}</h1><pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body></html>`;
           const w = window.open('about:blank', '_blank');
           if (!w) {
             toast('Pop-up blocked — allow pop-ups for this site', 'error');
@@ -1002,402 +1186,371 @@
           w.document.write(html);
           w.document.close();
         }
-
-        toast('Launching ' + file.fullName, 'success');
       } catch (e) {
-        toast('Failed: ' + e.message, 'error');
+        toast('Failed to run: ' + e.message, 'error');
       }
     }
 
-    function renderMarkdown(md, title) {
-      let html = md
-        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;">')
-        .replace(/^---$/gm, '<hr>')
-        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
-        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-        .replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-        .replace(/\n{2,}/g, '</p><p>')
-        .replace(/\n/g, '<br>');
-
-      return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>${title}</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:32px 24px;background:#0c0c0d;color:#e4e4e7;line-height:1.75;}
-h1{color:#F5A623;font-size:1.8em;margin:1.2em 0 0.4em;border-bottom:1px solid #222;padding-bottom:0.3em;}
-h2{color:#F5A623;font-size:1.4em;margin:1em 0 0.4em;}
-h3{color:#d4d4d8;font-size:1.15em;margin:0.8em 0 0.3em;}
-h4{color:#a1a1aa;font-size:1em;margin:0.6em 0 0.2em;}
-a{color:#F5A623;}code{background:#1a1a1e;padding:2px 7px;border-radius:4px;font-size:0.88em;color:#F5A623;}
-pre{background:#111214;padding:16px;border-radius:10px;overflow-x:auto;border:1px solid #282A2E;}
-pre code{background:none;padding:0;color:#d4d4d8;font-size:0.85em;}
-ul,ol{padding-left:24px;}li{margin:4px 0;}
-hr{border:none;border-top:1px solid #282A2E;margin:1.5em 0;}
-img{border-radius:8px;}
-p{margin:0.5em 0;}
-</style></head><body><p>${html}</p></body></html>`;
-    }
-
-    function togglePin(path) {
-      const idx = state.pinned.indexOf(path);
-      if (idx === -1) {
-        state.pinned.push(path);
-        toast('Pinned', 'success');
-      } else {
-        state.pinned.splice(idx, 1);
-        toast('Unpinned');
-      }
-      savePins();
-      renderPinned();
-      renderFiles();
-    }
-
-    function openSidebar() {
-      document.getElementById('sidebar').classList.add('open');
-      document.getElementById('sidebarOverlay').classList.add('open');
-    }
-
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-
-    function renderTabs() {
-      const bar = document.getElementById('tabBar');
-      let h = '';
-
-      const allCount = state.files.length;
-      h += `<button class="tab-item ${state.activeTab===''?'active':''}" data-tab="" role="tab" aria-selected="${state.activeTab===''}">All <span class="tab-count">${allCount}</span></button>`;
-
-      const foldersWithFiles = state.folders.filter(f => {
-        return state.files.some(fi => fi.folder === f && !fi.folder.includes(f + '/'));
-      });
-
-      for (const folder of foldersWithFiles) {
-        const label = folder.split('/').pop();
-        const count = state.files.filter(f => f.folder === folder).length;
-        const isActive = state.activeTab === folder;
-        h += `<button class="tab-item ${isActive?'active':''}" data-tab="${folder}" role="tab" aria-selected="${isActive}">${label} <span class="tab-count">${count}</span></button>`;
-      }
-
-      bar.innerHTML = h;
-      lucide.createIcons({
-        nodes: bar.querySelectorAll('[data-lucide]')
-      });
-    }
-
-    function sortFiles(files) {
-      const sorted = [...files];
+    function showFileInfo(file) {
+      const modal = document.getElementById('fileInfoModal');
+      const meta = state.fileMetadata[file.path];
       
-      if (state.sortBy === 'name') {
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (state.sortBy === 'name-desc') {
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
-      } else if (state.sortBy === 'extension') {
-        sorted.sort((a, b) => {
-          if (a.extension !== b.extension) return a.extension.localeCompare(b.extension);
-          return a.name.localeCompare(b.name);
-        });
-      } else if (state.sortBy === 'size') {
-        sorted.sort((a, b) => {
-          if (a.size !== b.size) return a.size - b.size;
-          return a.name.localeCompare(b.name);
-        });
+      let infoHtml = `
+        <div class="info-row">
+          <span class="info-label">Type</span>
+          <span class="info-value">${extLabel(file.extension)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Size</span>
+          <span class="info-value">${formatFileSize(file.size)}</span>
+        </div>
+      `;
+
+      if (meta && meta.lastModified) {
+        infoHtml += `
+          <div class="info-row">
+            <span class="info-label">Modified</span>
+            <span class="info-value">${getRelativeTime(meta.lastModified)}</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Last Author</span>
+            <span class="info-value">${meta.author}</span>
+          </div>
+        `;
       }
 
-      return sorted;
+      document.getElementById('infoFileName').innerHTML = `<i data-lucide="${fileIcon(file.extension)}" style="width:20px; height:20px;"></i> ${file.fullName}`;
+      document.getElementById('fileInfoContent').innerHTML = infoHtml;
+      modal.classList.add('open');
+
+      if (window.lucide) window.lucide.createIcons();
     }
 
-    function renderFiles() {
+    function renderFileGrid(files) {
       const grid = document.getElementById('fileGrid');
-      let files = [...state.files];
+      grid.innerHTML = '';
 
-      if (state.activeTab !== '') {
-        files = files.filter(f => f.folder === state.activeTab);
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        files = files.filter(f => f.name.toLowerCase().includes(q) || f.fullName.toLowerCase().includes(q) || f.path.toLowerCase().includes(q));
-      }
-
-      if (files.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-            <i data-lucide="folder-open" style="width:48px; height:48px; margin-bottom:14px; opacity:0.25;"></i>
-            <p style="font-size:15px; font-weight:600; margin-bottom:4px;">No files found</p>
-            <p style="font-size:12px;">Try a different tab or search term</p>
-        </div>`;
-        lucide.createIcons();
+      if (!files.length) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No files found</p></div>';
         return;
       }
 
-      files.sort((a, b) => {
-        const ap = state.pinned.includes(a.path) ? 0 : 1;
-        const bp = state.pinned.includes(b.path) ? 0 : 1;
-        if (ap !== bp) return ap - bp;
-        return 0;
+      files.forEach((file, idx) => {
+        const isPinned = state.pinned.some(p => p.path === file.path);
+        const btn = document.createElement('button');
+        btn.className = 'file-btn';
+        btn.innerHTML = `
+          <button class="action-btn pin-btn ${isPinned ? 'pinned' : ''}" title="Pin">
+            <i data-lucide="pin" style="width:14px; height:14px;"></i>
+          </button>
+          <button class="action-btn download-btn" title="Download">
+            <i data-lucide="download" style="width:14px; height:14px;"></i>
+          </button>
+          <div class="file-icon">
+            <i data-lucide="${fileIcon(file.extension, file.folder)}" style="width:30px; height:30px;"></i>
+          </div>
+          <div class="file-name">${file.fullName}</div>
+          <div class="file-ext" style="background-color:${extColor(file.extension)}40">${extLabel(file.extension)}</div>
+        `;
+
+        btn.addEventListener('click', () => runFile(file));
+
+        const pinBtn = btn.querySelector('.pin-btn');
+        pinBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (isPinned) {
+            state.pinned = state.pinned.filter(p => p.path !== file.path);
+          } else {
+            state.pinned.push(file);
+          }
+          savePins();
+          renderFileGrid(files);
+          updatePinnedList();
+        });
+
+        const dlBtn = btn.querySelector('.download-btn');
+        dlBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          downloadFile(file);
+        });
+
+        btn.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          showFileInfo(file);
+        });
+
+        grid.appendChild(btn);
       });
 
-      files = sortFiles(files);
-
-      let h = '';
-      files.forEach((file, i) => {
-        const pinned = state.pinned.includes(file.path);
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        const label = extLabel(file.extension);
-        const delay = Math.min(i * 30, 400);
-        h += `<div class="file-btn" data-run="${file.path}" style="animation-delay:${delay}ms;" tabindex="0" role="button" aria-label="Run ${file.fullName}">
-            <button class="action-btn pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
-                <i data-lucide="${pinned?'pin-off':'pin'}" style="width:13px; height:13px;"></i>
-            </button>
-            <button class="action-btn download-btn" data-download="${file.path}" aria-label="Download ${file.fullName}" title="Download">
-                <i data-lucide="download" style="width:13px; height:13px;"></i>
-            </button>
-            <i data-lucide="${icon}" class="file-icon" style="color:${col};"></i>
-            <span class="file-name">${escHtml(file.name)}</span>
-            <span class="file-ext" style="color:${col}; background:${col}18;">${label}</span>
-        </div>`;
-      });
-
-      grid.innerHTML = h;
-      grid.className = state.viewMode === 'list' ? 'file-grid list-view' : 'file-grid';
-      lucide.createIcons();
+      if (window.lucide) window.lucide.createIcons();
     }
 
-    function renderPinned() {
+    function updatePinnedList() {
       const list = document.getElementById('pinnedList');
       const empty = document.getElementById('pinnedEmpty');
-      const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
+      list.innerHTML = '';
 
-      if (pinnedFiles.length === 0) {
-        list.innerHTML = '';
+      if (!state.pinned.length) {
         empty.style.display = 'block';
         return;
       }
+
       empty.style.display = 'none';
 
-      let h = '';
-      pinnedFiles.forEach((file, idx) => {
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        h += `<button class="sidebar-item" data-run="${file.path}" draggable="true" data-pinned-idx="${idx}">
-            <i data-lucide="drag-handle" style="width:16px; height:16px; color:var(--muted); flex-shrink:0;"></i>
-            <i data-lucide="${icon}" style="width:16px; height:16px; color:${col}; flex-shrink:0;"></i>
-            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(file.name)}</span>
-            <i data-lucide="play" style="width:13px; height:13px; color:var(--muted); flex-shrink:0;"></i>
-        </button>`;
+      state.pinned.forEach((file, idx) => {
+        const item = document.createElement('div');
+        item.className = 'sidebar-item';
+        item.draggable = true;
+        item.innerHTML = `
+          <i data-lucide="${fileIcon(file.extension)}" style="width:14px; height:14px;"></i>
+          <span>${file.fullName}</span>
+        `;
+
+        item.addEventListener('dragstart', () => {
+          state.draggedPinIndex = idx;
+          item.classList.add('dragging');
+        });
+
+        item.addEventListener('dragend', () => {
+          item.classList.remove('dragging');
+        });
+
+        item.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          item.classList.add('drag-over');
+        });
+
+        item.addEventListener('dragleave', () => {
+          item.classList.remove('drag-over');
+        });
+
+        item.addEventListener('drop', (e) => {
+          e.preventDefault();
+          item.classList.remove('drag-over');
+          if (state.draggedPinIndex !== null && state.draggedPinIndex !== idx) {
+            const [moved] = state.pinned.splice(state.draggedPinIndex, 1);
+            state.pinned.splice(idx, 0, moved);
+            savePins();
+            updatePinnedList();
+          }
+        });
+
+        item.addEventListener('click', () => runFile(file));
+
+        list.appendChild(item);
       });
-      list.innerHTML = h;
-      lucide.createIcons();
+
+      if (window.lucide) window.lucide.createIcons();
     }
 
-    function escHtml(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    function applyFilters() {
+      let result = [...state.files];
+
+      // Filter by folder
+      if (state.selectedFolder) {
+        result = result.filter(f => f.folder === state.selectedFolder);
+      }
+
+      // Filter by search
+      if (state.searchQuery) {
+        result = fuzzySearch(state.searchQuery, result, 'fullName');
+      }
+
+      // Sort pins
+      if (state.filterPins) {
+        const pinned = result.filter(f => state.pinned.some(p => p.path === f.path));
+        const unpinned = result.filter(f => !state.pinned.some(p => p.path === f.path));
+        result = pinned.concat(unpinned);
+      }
+
+      // Sort by size
+      if (state.filterBySize) {
+        result.sort((a, b) => state.sortAscending.size ? a.size - b.size : b.size - a.size);
+      }
+
+      // Sort by date (requires metadata)
+      if (state.filterByDate) {
+        result.sort((a, b) => {
+          const aDate = state.fileMetadata[a.path]?.lastModified || new Date(0);
+          const bDate = state.fileMetadata[b.path]?.lastModified || new Date(0);
+          return state.sortAscending.date ? aDate - bDate : bDate - aDate;
+        });
+      }
+
+      // Default sort by name
+      if (!state.filterBySize && !state.filterByDate) {
+        result.sort((a, b) => a.fullName.localeCompare(b.fullName));
+      }
+
+      return result;
     }
 
-    function showLoading() {
-      const grid = document.getElementById('fileGrid');
-      let h = '';
-      for (let i = 0; i < 12; i++) h += '<div class="skeleton"></div>';
-      grid.innerHTML = h;
+    function updateUI() {
+      const filtered = applyFilters();
+
+      // Update file grid
+      document.getElementById('fileGrid').classList.toggle('list-view', state.viewMode === 'list');
+      renderFileGrid(filtered);
+
+      // Update button states
+      document.getElementById('pinFilterBtn').classList.toggle('active', state.filterPins);
+      document.getElementById('sizeFilterBtn').classList.toggle('active', state.filterBySize);
+      document.getElementById('dateFilterBtn').classList.toggle('active', state.filterByDate);
+      document.getElementById('gridViewBtn').classList.toggle('active', state.viewMode === 'grid');
+      document.getElementById('listViewBtn').classList.toggle('active', state.viewMode === 'list');
+
+      // Update file count
+      document.getElementById('fileCount').textContent = filtered.length + ' files';
     }
 
-    function updateFileCount() {
-      const el = document.getElementById('fileCount');
-      let files = state.files;
-      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab);
-      el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
-    }
-
-    async function refreshRepo() {
-      closeSidebar();
-      showLoading();
+    async function initApp() {
+      state.isLoading = true;
       try {
-        const branch = await fetchDefaultBranch(state.owner, state.repo);
-        state.branch = branch;
-
-        const tree = await fetchTree(state.owner, state.repo, branch);
+        state.branch = await fetchDefaultBranch(state.owner, state.repo);
+        const tree = await fetchTree(state.owner, state.repo, state.branch);
         const parsed = parseTree(tree);
         state.files = parsed.files;
         state.folders = parsed.folders;
 
-        const paths = new Set(state.files.map(f => f.path));
-        state.pinned = state.pinned.filter(p => paths.has(p));
-        savePins();
+        // Update folder dropdown
+        const folderSelect = document.getElementById('folderDropdown');
+        state.folders.forEach(folder => {
+          const opt = document.createElement('option');
+          opt.value = folder;
+          opt.textContent = folder;
+          folderSelect.appendChild(opt);
+        });
+
+        // Load file metadata
+        for (const file of state.files.slice(0, 20)) {
+          const meta = await getFileMetadata(file.path);
+          if (meta) state.fileMetadata[file.path] = meta;
+        }
+
+        loadPins();
+        loadPreferences();
+        updateUI();
 
         document.getElementById('repoTitle').textContent = state.repo;
-        document.getElementById('repoSubtitle').textContent = state.owner + ' / ' + state.branch;
-
-        renderTabs();
-        renderFiles();
-        renderPinned();
-        updateFileCount();
-        toast('Loaded ' + state.files.length + ' files', 'success');
+        document.getElementById('repoSubtitle').textContent = `${state.owner} • ${state.files.length} files`;
       } catch (e) {
         toast(e.message, 'error');
+      } finally {
+        state.isLoading = false;
       }
     }
 
-    function getFileByPath(path) {
-      return state.files.find(f => f.path === path);
-    }
-
-    document.getElementById('openSidebarBtn').addEventListener('click', openSidebar);
-    document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
-    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
-    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
-
-    document.getElementById('sortDropdown').addEventListener('change', e => {
-      state.sortBy = e.target.value;
-      saveSortPreference();
-      renderFiles();
+    // Event listeners
+    document.getElementById('openSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebarOverlay').classList.add('open');
     });
 
-    document.getElementById('gridViewBtn').addEventListener('click', () => {
-      state.viewMode = 'grid';
-      saveViewPreference();
-      document.getElementById('gridViewBtn').classList.add('active');
-      document.getElementById('listViewBtn').classList.remove('active');
-      renderFiles();
+    document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
     });
 
-    document.getElementById('listViewBtn').addEventListener('click', () => {
-      state.viewMode = 'list';
-      saveViewPreference();
-      document.getElementById('listViewBtn').classList.add('active');
-      document.getElementById('gridViewBtn').classList.remove('active');
-      renderFiles();
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
     });
 
-    document.getElementById('sortDropdown').value = state.sortBy;
-    if (state.viewMode === 'list') {
-      document.getElementById('listViewBtn').classList.add('active');
-      document.getElementById('gridViewBtn').classList.remove('active');
-    }
-
-    document.getElementById('searchInput').addEventListener('input', e => {
+    document.getElementById('searchInput').addEventListener('input', (e) => {
       state.searchQuery = e.target.value;
-      renderFiles();
-      updateFileCount();
+      updateUI();
     });
 
     document.getElementById('clearSearchBtn').addEventListener('click', () => {
       document.getElementById('searchInput').value = '';
       state.searchQuery = '';
-      renderFiles();
-      updateFileCount();
+      updateUI();
     });
 
-    document.getElementById('tabBar').addEventListener('click', e => {
-      const btn = e.target.closest('.tab-item');
-      if (btn) {
-        state.activeTab = btn.getAttribute('data-tab');
-        renderTabs();
-        renderFiles();
-        updateFileCount();
+    document.getElementById('gridViewBtn').addEventListener('click', () => {
+      state.viewMode = 'grid';
+      savePreferences();
+      updateUI();
+    });
+
+    document.getElementById('listViewBtn').addEventListener('click', () => {
+      state.viewMode = 'list';
+      savePreferences();
+      updateUI();
+    });
+
+    document.getElementById('pinFilterBtn').addEventListener('click', () => {
+      state.filterPins = !state.filterPins;
+      state.filterBySize = false;
+      state.filterByDate = false;
+      updateUI();
+    });
+
+    document.getElementById('sizeFilterBtn').addEventListener('click', () => {
+      if (state.filterBySize) {
+        state.sortAscending.size = !state.sortAscending.size;
+      }
+      state.filterBySize = !state.filterBySize;
+      state.filterPins = false;
+      state.filterByDate = false;
+      updateUI();
+    });
+
+    document.getElementById('dateFilterBtn').addEventListener('click', () => {
+      if (state.filterByDate) {
+        state.sortAscending.date = !state.sortAscending.date;
+      }
+      state.filterByDate = !state.filterByDate;
+      state.filterPins = false;
+      state.filterBySize = false;
+      updateUI();
+    });
+
+    document.getElementById('allFilesBtn').addEventListener('click', () => {
+      document.getElementById('folderDropdown').value = '';
+      state.selectedFolder = '';
+      updateUI();
+    });
+
+    document.getElementById('folderDropdown').addEventListener('change', (e) => {
+      state.selectedFolder = e.target.value;
+      updateUI();
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', () => {
+      initApp();
+      toast('Repository refreshed', 'success');
+    });
+
+    document.getElementById('sidebarRefresh').addEventListener('click', () => {
+      initApp();
+      toast('Repository refreshed', 'success');
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    });
+
+    document.getElementById('closeInfoBtn').addEventListener('click', () => {
+      document.getElementById('fileInfoModal').classList.remove('open');
+    });
+
+    document.getElementById('fileInfoModal').addEventListener('click', (e) => {
+      if (e.target.id === 'fileInfoModal') {
+        document.getElementById('fileInfoModal').classList.remove('open');
       }
     });
 
-    document.getElementById('fileGrid').addEventListener('click', e => {
-      const pinBtn = e.target.closest('.pin-btn');
-      if (pinBtn) {
-        e.stopPropagation();
-        togglePin(pinBtn.getAttribute('data-pin'));
-        return;
-      }
-
-      const dlBtn = e.target.closest('.download-btn');
-      if (dlBtn) {
-        e.stopPropagation();
-        const file = getFileByPath(dlBtn.getAttribute('data-download'));
-        if (file) downloadFile(file);
-        return;
-      }
-
-      const fileBtn = e.target.closest('.file-btn');
-      if (fileBtn) {
-        const file = getFileByPath(fileBtn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
+    // Scroll to top button
+    const scrollBtn = document.getElementById('scrollToTopBtn');
+    window.addEventListener('scroll', () => {
+      scrollBtn.classList.toggle('show', window.scrollY > 300);
     });
 
-    document.getElementById('fileGrid').addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const fileBtn = e.target.closest('.file-btn');
-        if (fileBtn) {
-          const file = getFileByPath(fileBtn.getAttribute('data-run'));
-          if (file) runFile(file);
-        }
-      }
+    scrollBtn.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    document.getElementById('pinnedList').addEventListener('dragstart', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        state.draggedPinIndex = parseInt(btn.getAttribute('data-pinned-idx'));
-        btn.classList.add('dragging');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragend', e => {
-      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('dragging', 'drag-over'));
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragover', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.add('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragleave', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.remove('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('drop', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && state.draggedPinIndex !== null) {
-        const targetIdx = parseInt(btn.getAttribute('data-pinned-idx'));
-        const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
-        
-        if (state.draggedPinIndex !== targetIdx) {
-          const draggedPin = state.pinned[state.draggedPinIndex];
-          state.pinned.splice(state.draggedPinIndex, 1);
-          state.pinned.splice(targetIdx, 0, draggedPin);
-          savePins();
-          renderPinned();
-        }
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('click', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && !e.target.closest('[data-pinned-idx]')) {
-        const file = getFileByPath(btn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
-    });
-
-    loadPins();
-    loadPreferences();
-    refreshRepo();
+    // Initialize app
+    initApp();
   </script>
 </body>
 
