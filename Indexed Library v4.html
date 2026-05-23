@@ -108,7 +108,7 @@
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23000' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23fff' filter='url(%23n)'/%3E%3C/svg%3E");
       background-size: 128px 128px;
     }
 
@@ -136,6 +136,7 @@
       gap: 8px;
       padding: 10px 16px;
       border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
     }
 
     .filter-btn {
@@ -233,6 +234,7 @@
 
     .folder-dropdown {
       flex: 1;
+      min-width: 120px;
       padding: 6px 12px;
       background: var(--card);
       border: 1px solid var(--border);
@@ -873,7 +875,7 @@
     </div>
 
     <div class="controls-bar">
-      <button id="pinFilterBtn" class="filter-btn" title="Pin Filter">
+      <button id="pinFilterBtn" class="filter-btn" title="Filter by Pinned">
         <i data-lucide="pin" style="width:14px; height:14px;"></i>
         <span class="arrow">↓</span>
       </button>
@@ -999,108 +1001,16 @@
       setTimeout(() => el.remove(), 3000);
     }
 
-    async function fetchDefaultBranch(owner, repo) {
-      const url = `https://api.github.com/repos/${owner}/${repo}`;
-      const res = await fetch(url);
-      if (res.status === 404) throw new Error('Repository not found.');
-      if (res.status === 403) throw new Error('GitHub API rate limit hit. Wait a minute and try again.');
-      if (!res.ok) throw new Error('GitHub API error: ' + res.status);
-      const data = await res.json();
-      if (data.private) throw new Error('This repository is private.');
-      return data.default_branch;
-    }
-
-    async function fetchTree(owner, repo, branch) {
-      const url = `https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch repository tree: ' + res.status);
-      const data = await res.json();
-      if (data.truncated) toast('Large repo — some files may be missing', 'error');
-      return data.tree.filter(i => i.type === 'blob');
-    }
-
-    async function fetchFileContent(path) {
-      const url = `https://raw.githubusercontent.com/${state.owner}/${state.repo}/${state.branch}/${path}`;
-      const res = await fetch(url);
-      if (!res.ok) throw new Error('Failed to fetch file');
-      return res.text();
-    }
-
-    async function getFileMetadata(path) {
-      try {
-        const url = `https://api.github.com/repos/${state.owner}/${state.repo}/commits?path=${path}&per_page=1`;
-        const res = await fetch(url);
-        if (!res.ok) return null;
-        const commits = await res.json();
-        if (commits.length > 0) {
-          return {
-            lastModified: new Date(commits[0].commit.author.date),
-            author: commits[0].commit.author.name
-          };
-        }
-      } catch (e) {}
-      return null;
-    }
-
-    function parseTree(tree) {
-      const files = [];
-      const folderSet = new Set();
-
-      for (const item of tree) {
-        const parts = item.path.split('/');
-        if (parts.some(p => p.startsWith('.'))) continue;
-
-        const name = parts[parts.length - 1];
-        const ext = name.includes('.') ? name.split('.').pop().toLowerCase() : '';
-
-        if (!ALLOWED_EXT.includes(ext)) continue;
-
-        const folder = parts.length > 1 ? parts.slice(0, -1).join('/') : '';
-
-        files.push({
-          name: name.includes('.') ? name.slice(0, name.lastIndexOf('.')) : name,
-          fullName: name,
-          path: item.path,
-          extension: ext,
-          folder,
-          size: item.size || 0,
-          sha: item.sha,
-          type: 'file'
-        });
-
-        for (let i = 1; i < parts.length; i++) {
-          folderSet.add(parts.slice(0, i).join('/'));
-        }
-      }
-
-      const folders = Array.from(folderSet).sort();
-      return { files, folders };
-    }
-
-    function getFolderIcon(folderName) {
-      const lower = folderName.toLowerCase();
-      for (const [key, icon] of Object.entries(folderIcons)) {
-        if (lower.includes(key)) return icon;
-      }
-      return 'folder';
-    }
-
-    function fileIcon(ext, folder = '') {
-      if (['html', 'htm'].includes(ext)) return 'globe';
-      if (['md', 'markdown'].includes(ext)) return 'file-text';
-      return 'file';
-    }
-
-    function extColor(ext) {
-      if (['html', 'htm'].includes(ext)) return '#E8614D';
-      if (['md', 'markdown'].includes(ext)) return '#9CA3AF';
-      return '#6E7078';
-    }
-
-    function extLabel(ext) {
-      if (['html', 'htm'].includes(ext)) return 'HTML';
-      if (['md', 'markdown'].includes(ext)) return 'MD';
-      return ext.toUpperCase();
+    function getFileIcon(name) {
+      const ext = name.split('.').pop().toLowerCase();
+      const icons = {
+        'html': 'globe', 'htm': 'globe', 'md': 'book-open', 'markdown': 'book-open',
+        'pdf': 'file-pdf', 'jpg': 'image', 'jpeg': 'image', 'png': 'image', 'gif': 'image',
+        'zip': 'archive', 'rar': 'archive', '7z': 'archive',
+        'mp3': 'music', 'mp4': 'video', 'avi': 'video',
+        'txt': 'file-text', 'json': 'code', 'xml': 'code', 'js': 'code', 'css': 'code'
+      };
+      return icons[ext] || 'file';
     }
 
     function formatFileSize(bytes) {
@@ -1108,339 +1018,217 @@
       const k = 1024;
       const sizes = ['B', 'KB', 'MB', 'GB'];
       const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
 
-    function getRelativeTime(date) {
-      const seconds = Math.floor((new Date() - date) / 1000);
-      if (seconds < 60) return 'just now';
-      if (seconds < 3600) return Math.floor(seconds / 60) + 'm ago';
-      if (seconds < 86400) return Math.floor(seconds / 3600) + 'h ago';
-      if (seconds < 604800) return Math.floor(seconds / 86400) + 'd ago';
-      return Math.floor(seconds / 604800) + 'w ago';
+    function formatDate(date) {
+      const d = new Date(date);
+      return d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     }
 
-    async function downloadFile(file) {
-      try {
-        const content = await fetchFileContent(file.path);
-        const filename = file.fullName;
-        
-        const blob = new Blob([content], { type: "text/html" });
+    function applyFilters(files) {
+      let result = [...files];
 
-        if ('showSaveFilePicker' in window) {
-          try {
-            const handle = await window.showSaveFilePicker({
-              suggestedName: filename,
-              types: [{ description: "Files", accept: { "*/*": [".html", ".md"] } }],
-            });
-            const writable = await handle.createWritable();
-            await writable.write(blob);
-            await writable.close();
-            toast('File saved', 'success');
-            return;
-          } catch (err) {
-            if (err.name === 'AbortError') return;
-          }
-        }
-
-        try {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = url;
-          a.download = filename;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          toast('File saved', 'success');
-        } catch (err) {
-          toast('Download failed', 'error');
-        }
-      } catch (e) {
-        toast('Failed: ' + e.message, 'error');
-      }
-    }
-
-    async function runFile(file) {
-      try {
-        const content = await fetchFileContent(file.path);
-        const ext = file.extension;
-
-        if (['html', 'htm'].includes(ext)) {
-          const w = window.open('about:blank', '_blank');
-          if (!w) {
-            toast('Pop-up blocked — allow pop-ups for this site', 'error');
-            return;
-          }
-          w.document.open();
-          w.document.write(content);
-          w.document.close();
-        } else if (['md', 'markdown'].includes(ext)) {
-          const html = `<!DOCTYPE html><html><head><style>body{font-family:sans-serif;max-width:800px;margin:0 auto;padding:20px;background:#f5f5f5}pre{background:#333;color:#0f0;padding:15px;border-radius:5px;overflow-x:auto}</style></head><body><h1>${file.fullName}</h1><pre>${content.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</pre></body></html>`;
-          const w = window.open('about:blank', '_blank');
-          if (!w) {
-            toast('Pop-up blocked — allow pop-ups for this site', 'error');
-            return;
-          }
-          w.document.open();
-          w.document.write(html);
-          w.document.close();
-        }
-      } catch (e) {
-        toast('Failed to run: ' + e.message, 'error');
-      }
-    }
-
-    function showFileInfo(file) {
-      const modal = document.getElementById('fileInfoModal');
-      const meta = state.fileMetadata[file.path];
-      
-      let infoHtml = `
-        <div class="info-row">
-          <span class="info-label">Type</span>
-          <span class="info-value">${extLabel(file.extension)}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Size</span>
-          <span class="info-value">${formatFileSize(file.size)}</span>
-        </div>
-      `;
-
-      if (meta && meta.lastModified) {
-        infoHtml += `
-          <div class="info-row">
-            <span class="info-label">Modified</span>
-            <span class="info-value">${getRelativeTime(meta.lastModified)}</span>
-          </div>
-          <div class="info-row">
-            <span class="info-label">Last Author</span>
-            <span class="info-value">${meta.author}</span>
-          </div>
-        `;
-      }
-
-      document.getElementById('infoFileName').innerHTML = `<i data-lucide="${fileIcon(file.extension)}" style="width:20px; height:20px;"></i> ${file.fullName}`;
-      document.getElementById('fileInfoContent').innerHTML = infoHtml;
-      modal.classList.add('open');
-
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function renderFileGrid(files) {
-      const grid = document.getElementById('fileGrid');
-      grid.innerHTML = '';
-
-      if (!files.length) {
-        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No files found</p></div>';
-        return;
-      }
-
-      files.forEach((file, idx) => {
-        const isPinned = state.pinned.some(p => p.path === file.path);
-        const btn = document.createElement('button');
-        btn.className = 'file-btn';
-        btn.innerHTML = `
-          <button class="action-btn pin-btn ${isPinned ? 'pinned' : ''}" title="Pin">
-            <i data-lucide="pin" style="width:14px; height:14px;"></i>
-          </button>
-          <button class="action-btn download-btn" title="Download">
-            <i data-lucide="download" style="width:14px; height:14px;"></i>
-          </button>
-          <div class="file-icon">
-            <i data-lucide="${fileIcon(file.extension, file.folder)}" style="width:30px; height:30px;"></i>
-          </div>
-          <div class="file-name">${file.fullName}</div>
-          <div class="file-ext" style="background-color:${extColor(file.extension)}40">${extLabel(file.extension)}</div>
-        `;
-
-        btn.addEventListener('click', () => runFile(file));
-
-        const pinBtn = btn.querySelector('.pin-btn');
-        pinBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          if (isPinned) {
-            state.pinned = state.pinned.filter(p => p.path !== file.path);
-          } else {
-            state.pinned.push(file);
-          }
-          savePins();
-          renderFileGrid(files);
-          updatePinnedList();
-        });
-
-        const dlBtn = btn.querySelector('.download-btn');
-        dlBtn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          downloadFile(file);
-        });
-
-        btn.addEventListener('contextmenu', (e) => {
-          e.preventDefault();
-          showFileInfo(file);
-        });
-
-        grid.appendChild(btn);
-      });
-
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function updatePinnedList() {
-      const list = document.getElementById('pinnedList');
-      const empty = document.getElementById('pinnedEmpty');
-      list.innerHTML = '';
-
-      if (!state.pinned.length) {
-        empty.style.display = 'block';
-        return;
-      }
-
-      empty.style.display = 'none';
-
-      state.pinned.forEach((file, idx) => {
-        const item = document.createElement('div');
-        item.className = 'sidebar-item';
-        item.draggable = true;
-        item.innerHTML = `
-          <i data-lucide="${fileIcon(file.extension)}" style="width:14px; height:14px;"></i>
-          <span>${file.fullName}</span>
-        `;
-
-        item.addEventListener('dragstart', () => {
-          state.draggedPinIndex = idx;
-          item.classList.add('dragging');
-        });
-
-        item.addEventListener('dragend', () => {
-          item.classList.remove('dragging');
-        });
-
-        item.addEventListener('dragover', (e) => {
-          e.preventDefault();
-          item.classList.add('drag-over');
-        });
-
-        item.addEventListener('dragleave', () => {
-          item.classList.remove('drag-over');
-        });
-
-        item.addEventListener('drop', (e) => {
-          e.preventDefault();
-          item.classList.remove('drag-over');
-          if (state.draggedPinIndex !== null && state.draggedPinIndex !== idx) {
-            const [moved] = state.pinned.splice(state.draggedPinIndex, 1);
-            state.pinned.splice(idx, 0, moved);
-            savePins();
-            updatePinnedList();
-          }
-        });
-
-        item.addEventListener('click', () => runFile(file));
-
-        list.appendChild(item);
-      });
-
-      if (window.lucide) window.lucide.createIcons();
-    }
-
-    function applyFilters() {
-      let result = [...state.files];
-
-      // Filter by folder
+      // Apply folder filter
       if (state.selectedFolder) {
         result = result.filter(f => f.folder === state.selectedFolder);
       }
 
-      // Filter by search
+      // Apply search
       if (state.searchQuery) {
-        result = fuzzySearch(state.searchQuery, result, 'fullName');
+        result = fuzzySearch(state.searchQuery, result, 'name');
       }
 
-      // Sort pins
+      // Apply pin filter
       if (state.filterPins) {
-        const pinned = result.filter(f => state.pinned.some(p => p.path === f.path));
-        const unpinned = result.filter(f => !state.pinned.some(p => p.path === f.path));
-        result = pinned.concat(unpinned);
+        result = result.filter(f => state.pinned.includes(f.name));
       }
 
-      // Sort by size
-      if (state.filterBySize) {
-        result.sort((a, b) => state.sortAscending.size ? a.size - b.size : b.size - a.size);
-      }
-
-      // Sort by date (requires metadata)
+      // Apply sorting
       if (state.filterByDate) {
         result.sort((a, b) => {
-          const aDate = state.fileMetadata[a.path]?.lastModified || new Date(0);
-          const bDate = state.fileMetadata[b.path]?.lastModified || new Date(0);
-          return state.sortAscending.date ? aDate - bDate : bDate - aDate;
+          const dateA = new Date(a.lastModified || 0).getTime();
+          const dateB = new Date(b.lastModified || 0).getTime();
+          return state.sortAscending.date ? dateA - dateB : dateB - dateA;
         });
-      }
-
-      // Default sort by name
-      if (!state.filterBySize && !state.filterByDate) {
-        result.sort((a, b) => a.fullName.localeCompare(b.fullName));
+      } else if (state.filterBySize) {
+        result.sort((a, b) => {
+          const sizeA = a.size || 0;
+          const sizeB = b.size || 0;
+          return state.sortAscending.size ? sizeA - sizeB : sizeB - sizeA;
+        });
+      } else {
+        result.sort((a, b) => {
+          const nameA = a.name.toLowerCase();
+          const nameB = b.name.toLowerCase();
+          return state.sortAscending.pins ? nameA.localeCompare(nameB) : nameB.localeCompare(nameA);
+        });
       }
 
       return result;
     }
 
-    function updateUI() {
-      const filtered = applyFilters();
+    function renderFileGrid(files) {
+      const grid = document.getElementById('fileGrid');
+      const filtered = applyFilters(files);
 
-      // Update file grid
-      document.getElementById('fileGrid').classList.toggle('list-view', state.viewMode === 'list');
-      renderFileGrid(filtered);
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No files found</p></div>';
+        return;
+      }
 
-      // Update button states
-      document.getElementById('pinFilterBtn').classList.toggle('active', state.filterPins);
-      document.getElementById('sizeFilterBtn').classList.toggle('active', state.filterBySize);
-      document.getElementById('dateFilterBtn').classList.toggle('active', state.filterByDate);
-      document.getElementById('gridViewBtn').classList.toggle('active', state.viewMode === 'grid');
-      document.getElementById('listViewBtn').classList.toggle('active', state.viewMode === 'list');
+      grid.innerHTML = filtered.map(file => {
+        const isPinned = state.pinned.includes(file.name);
+        const icon = getFileIcon(file.name);
+        const ext = file.name.split('.').pop().toUpperCase();
+        
+        return `
+          <div class="file-btn" data-filename="${file.name}">
+            <button class="action-btn pin-btn ${isPinned ? 'pinned' : ''}" title="Pin" data-pin="${file.name}">
+              <i data-lucide="pin" style="width:14px; height:14px;"></i>
+            </button>
+            <button class="action-btn download-btn" title="Info" data-info="${file.name}">
+              <i data-lucide="info" style="width:14px; height:14px;"></i>
+            </button>
+            <div class="file-icon">
+              <i data-lucide="${icon}" style="width:24px; height:24px;"></i>
+            </div>
+            <div class="file-name">${file.name}</div>
+            <div class="file-ext" style="background:var(--accent-dim); color:var(--accent);">${ext}</div>
+          </div>
+        `;
+      }).join('');
 
-      // Update file count
-      document.getElementById('fileCount').textContent = filtered.length + ' files';
+      lucide.createIcons();
+      attachFileHandlers();
     }
 
-    async function initApp() {
-      state.isLoading = true;
-      try {
-        state.branch = await fetchDefaultBranch(state.owner, state.repo);
-        const tree = await fetchTree(state.owner, state.repo, state.branch);
-        const parsed = parseTree(tree);
-        state.files = parsed.files;
-        state.folders = parsed.folders;
+    function attachFileHandlers() {
+      document.querySelectorAll('.file-btn').forEach(btn => {
+        const pinBtn = btn.querySelector('.pin-btn');
+        const infoBtn = btn.querySelector('.download-btn');
 
-        // Update folder dropdown
-        const folderSelect = document.getElementById('folderDropdown');
-        state.folders.forEach(folder => {
-          const opt = document.createElement('option');
-          opt.value = folder;
-          opt.textContent = folder;
-          folderSelect.appendChild(opt);
+        pinBtn?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const fileName = pinBtn.dataset.pin;
+          const idx = state.pinned.indexOf(fileName);
+          if (idx > -1) {
+            state.pinned.splice(idx, 1);
+          } else {
+            state.pinned.push(fileName);
+          }
+          savePins();
+          renderFileGrid(state.files);
         });
 
-        // Load file metadata
-        for (const file of state.files.slice(0, 20)) {
-          const meta = await getFileMetadata(file.path);
-          if (meta) state.fileMetadata[file.path] = meta;
-        }
+        infoBtn?.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const fileName = infoBtn.dataset.info;
+          const file = state.files.find(f => f.name === fileName);
+          if (file) showFileInfo(file);
+        });
+      });
+    }
 
-        loadPins();
-        loadPreferences();
-        updateUI();
+    function showFileInfo(file) {
+      const modal = document.getElementById('fileInfoModal');
+      const title = document.getElementById('infoFileName');
+      const content = document.getElementById('fileInfoContent');
 
-        document.getElementById('repoTitle').textContent = state.repo;
-        document.getElementById('repoSubtitle').textContent = `${state.owner} • ${state.files.length} files`;
-      } catch (e) {
-        toast(e.message, 'error');
-      } finally {
-        state.isLoading = false;
-      }
+      title.innerHTML = `<i data-lucide="file" style="width:20px; height:20px;"></i> ${file.name}`;
+      content.innerHTML = `
+        <div class="info-row">
+          <span class="info-label">Size</span>
+          <span class="info-value">${formatFileSize(file.size)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Last Modified</span>
+          <span class="info-value">${formatDate(file.lastModified)}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Folder</span>
+          <span class="info-value">${file.folder || 'Root'}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">Type</span>
+          <span class="info-value">${file.name.split('.').pop().toUpperCase()}</span>
+        </div>
+      `;
+
+      lucide.createIcons();
+      modal.classList.add('open');
     }
 
     // Event listeners
+    document.getElementById('pinFilterBtn').addEventListener('click', () => {
+      state.filterPins = !state.filterPins;
+      state.filterBySize = false;
+      state.filterByDate = false;
+      updateFilterButtons();
+      renderFileGrid(state.files);
+      toast(state.filterPins ? '📌 Showing pinned files' : '📌 Showing all files');
+    });
+
+    document.getElementById('sizeFilterBtn').addEventListener('click', () => {
+      state.filterBySize = !state.filterBySize;
+      state.filterByDate = false;
+      state.filterPins = false;
+      state.sortAscending.size = !state.sortAscending.size;
+      updateFilterButtons();
+      renderFileGrid(state.files);
+      toast(`📊 Sort by size: ${state.sortAscending.size ? 'Smallest first' : 'Largest first'}`);
+    });
+
+    document.getElementById('dateFilterBtn').addEventListener('click', () => {
+      state.filterByDate = !state.filterByDate;
+      state.filterBySize = false;
+      state.filterPins = false;
+      state.sortAscending.date = !state.sortAscending.date;
+      updateFilterButtons();
+      renderFileGrid(state.files);
+      toast(`🕐 Sort by date: ${state.sortAscending.date ? 'Oldest first' : 'Newest first'}`);
+    });
+
+    document.getElementById('gridViewBtn').addEventListener('click', () => {
+      state.viewMode = 'grid';
+      document.getElementById('gridViewBtn').classList.add('active');
+      document.getElementById('listViewBtn').classList.remove('active');
+      document.getElementById('fileGrid').classList.remove('list-view');
+    });
+
+    document.getElementById('listViewBtn').addEventListener('click', () => {
+      state.viewMode = 'list';
+      document.getElementById('listViewBtn').classList.add('active');
+      document.getElementById('gridViewBtn').classList.remove('active');
+      document.getElementById('fileGrid').classList.add('list-view');
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      state.searchQuery = e.target.value;
+      renderFileGrid(state.files);
+    });
+
+    document.getElementById('folderDropdown').addEventListener('change', (e) => {
+      state.selectedFolder = e.target.value;
+      renderFileGrid(state.files);
+    });
+
+    document.getElementById('clearSearchBtn').addEventListener('click', () => {
+      document.getElementById('searchInput').value = '';
+      state.searchQuery = '';
+      renderFileGrid(state.files);
+    });
+
+    document.getElementById('closeInfoBtn').addEventListener('click', () => {
+      document.getElementById('fileInfoModal').classList.remove('open');
+    });
+
+    document.getElementById('fileInfoModal').addEventListener('click', (e) => {
+      if (e.target === document.getElementById('fileInfoModal')) {
+        document.getElementById('fileInfoModal').classList.remove('open');
+      }
+    });
+
     document.getElementById('openSidebarBtn').addEventListener('click', () => {
       document.getElementById('sidebar').classList.add('open');
       document.getElementById('sidebarOverlay').classList.add('open');
@@ -1456,101 +1244,59 @@
       document.getElementById('sidebarOverlay').classList.remove('open');
     });
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      state.searchQuery = e.target.value;
-      updateUI();
-    });
-
-    document.getElementById('clearSearchBtn').addEventListener('click', () => {
-      document.getElementById('searchInput').value = '';
-      state.searchQuery = '';
-      updateUI();
-    });
-
-    document.getElementById('gridViewBtn').addEventListener('click', () => {
-      state.viewMode = 'grid';
-      savePreferences();
-      updateUI();
-    });
-
-    document.getElementById('listViewBtn').addEventListener('click', () => {
-      state.viewMode = 'list';
-      savePreferences();
-      updateUI();
-    });
-
-    document.getElementById('pinFilterBtn').addEventListener('click', () => {
-      state.filterPins = !state.filterPins;
-      state.filterBySize = false;
-      state.filterByDate = false;
-      updateUI();
-    });
-
-    document.getElementById('sizeFilterBtn').addEventListener('click', () => {
-      if (state.filterBySize) {
-        state.sortAscending.size = !state.sortAscending.size;
-      }
-      state.filterBySize = !state.filterBySize;
-      state.filterPins = false;
-      state.filterByDate = false;
-      updateUI();
-    });
-
-    document.getElementById('dateFilterBtn').addEventListener('click', () => {
-      if (state.filterByDate) {
-        state.sortAscending.date = !state.sortAscending.date;
-      }
-      state.filterByDate = !state.filterByDate;
-      state.filterPins = false;
-      state.filterBySize = false;
-      updateUI();
-    });
-
-    document.getElementById('allFilesBtn').addEventListener('click', () => {
-      document.getElementById('folderDropdown').value = '';
-      state.selectedFolder = '';
-      updateUI();
-    });
-
-    document.getElementById('folderDropdown').addEventListener('change', (e) => {
-      state.selectedFolder = e.target.value;
-      updateUI();
-    });
-
-    document.getElementById('refreshBtn').addEventListener('click', () => {
-      initApp();
-      toast('Repository refreshed', 'success');
-    });
-
-    document.getElementById('sidebarRefresh').addEventListener('click', () => {
-      initApp();
-      toast('Repository refreshed', 'success');
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    });
-
-    document.getElementById('closeInfoBtn').addEventListener('click', () => {
-      document.getElementById('fileInfoModal').classList.remove('open');
-    });
-
-    document.getElementById('fileInfoModal').addEventListener('click', (e) => {
-      if (e.target.id === 'fileInfoModal') {
-        document.getElementById('fileInfoModal').classList.remove('open');
-      }
-    });
-
-    // Scroll to top button
-    const scrollBtn = document.getElementById('scrollToTopBtn');
-    window.addEventListener('scroll', () => {
-      scrollBtn.classList.toggle('show', window.scrollY > 300);
-    });
-
-    scrollBtn.addEventListener('click', () => {
+    document.getElementById('scrollToTopBtn').addEventListener('click', () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
 
-    // Initialize app
-    initApp();
+    window.addEventListener('scroll', () => {
+      const btn = document.getElementById('scrollToTopBtn');
+      if (window.scrollY > 300) {
+        btn.classList.add('show');
+      } else {
+        btn.classList.remove('show');
+      }
+    });
+
+    function updateFilterButtons() {
+      document.getElementById('pinFilterBtn').classList.toggle('active', state.filterPins);
+      document.getElementById('sizeFilterBtn').classList.toggle('active', state.filterBySize);
+      document.getElementById('dateFilterBtn').classList.toggle('active', state.filterByDate);
+    }
+
+    // Sample data initialization
+    function initializeData() {
+      state.files = [
+        { name: 'index.html', folder: 'root', size: 15240, lastModified: new Date(Date.now() - 86400000) },
+        { name: 'about.html', folder: 'root', size: 8900, lastModified: new Date(Date.now() - 172800000) },
+        { name: 'README.md', folder: 'docs', size: 4520, lastModified: new Date(Date.now() - 259200000) },
+        { name: 'guide.md', folder: 'docs', size: 12340, lastModified: new Date(Date.now() - 3600000) },
+        { name: 'style.css', folder: 'assets', size: 32100, lastModified: new Date(Date.now() - 1209600000) }
+      ];
+
+      const folders = new Set(state.files.map(f => f.folder).filter(Boolean));
+      state.folders = Array.from(folders);
+
+      const dropdown = document.getElementById('folderDropdown');
+      state.folders.forEach(folder => {
+        const option = document.createElement('option');
+        option.value = folder;
+        option.textContent = folder.charAt(0).toUpperCase() + folder.slice(1);
+        dropdown.appendChild(option);
+      });
+
+      loadPins();
+      loadPreferences();
+      document.getElementById('repoTitle').textContent = state.repo;
+      document.getElementById('repoSubtitle').textContent = `by ${state.owner}`;
+      document.getElementById('fileCount').textContent = `${state.files.length} files`;
+      renderFileGrid(state.files);
+    }
+
+    // Initialize on load
+    window.addEventListener('load', () => {
+      lucide.createIcons();
+      initializeData();
+    });
   </script>
 </body>
 
