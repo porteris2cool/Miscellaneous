@@ -136,7 +136,7 @@
       z-index: 0;
       pointer-events: none;
       opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/%3E%3C/filter%3E%3Crect width='256' height='256' fill='%23fff' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOct[...]
       background-size: 128px 128px;
     }
 
@@ -640,14 +640,14 @@
       position: absolute;
       left: 28px;
       top: 50%;
-      transform: translateY(-55%);
+      transform: translateY(-50%);
       color: var(--muted);
       pointer-events: none;
     }
 
     .search-wrap .clear-btn {
       position: absolute;
-      right: 10px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
       width: 24px;
@@ -673,6 +673,30 @@
     .search-wrap .clear-btn:hover {
       background: var(--accent-dim);
       color: var(--accent);
+    }
+
+    .file-btn.loading {
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .file-btn.loading::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent 0%, rgba(245, 166, 35, 0.2) 50%, transparent 100%);
+      animation: loadingPulse 1.5s infinite;
+      border-radius: 14px;
+      z-index: 0;
+    }
+
+    @keyframes loadingPulse {
+      0% {
+        background-position: -1000px 0;
+      }
+      100% {
+        background-position: 1000px 0;
+      }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -737,7 +761,7 @@
   </aside>
 
   <div id="mainScreen" style="position:relative; z-index:1; min-height:100vh;">
-    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16px); position:sticky; top:0; z-index:10;">
+    <header style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; border-bottom:1px solid var(--border); background:rgba(8,9,10,0.82); backdrop-filter:blur(16[...]
       <div style="display:flex; align-items:center; gap:12px;">
         <button id="openSidebarBtn" style="background:none; border:none; color:var(--fg); cursor:pointer; padding:6px; border-radius:8px; transition:background 0.2s;" aria-label="Open menu">
           <i data-lucide="menu" style="width:22px; height:22px;"></i>
@@ -798,6 +822,7 @@
       sortBy: 'name',
       viewMode: 'grid',
       draggedPinIndex: null,
+      loadingPaths: new Set(),
     };
 
     const ALLOWED_EXT = ['html', 'htm', 'md', 'markdown'];
@@ -872,6 +897,30 @@
       return data.size || 0;
     }
 
+    function levenshteinDistance(a, b) {
+      const an = a.length;
+      const bn = b.length;
+      const dp = Array(bn + 1).fill(0).map(() => Array(an + 1).fill(0));
+      for (let i = 0; i <= an; i++) dp[0][i] = i;
+      for (let j = 0; j <= bn; j++) dp[j][0] = j;
+      for (let j = 1; j <= bn; j++) {
+        for (let i = 1; i <= an; i++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[j][i] = Math.min(dp[j - 1][i] + 1, dp[j][i - 1] + 1, dp[j - 1][i - 1] + cost);
+        }
+      }
+      return dp[bn][an];
+    }
+
+    function fuzzyMatch(query, text) {
+      const q = query.toLowerCase();
+      const t = text.toLowerCase();
+      if (t.includes(q)) return true;
+      const distance = levenshteinDistance(q, t);
+      const threshold = Math.ceil(Math.max(q.length, t.length) * 0.4);
+      return distance <= threshold;
+    }
+
     function parseTree(tree) {
       const files = [];
       const folderSet = new Set();
@@ -928,6 +977,8 @@
 
     async function downloadFile(file) {
       try {
+        state.loadingPaths.add(file.path);
+        updateFileButton(file);
         const content = await fetchFileContent(file.path);
         const filename = file.fullName;
         
@@ -952,9 +1003,15 @@
             await writable.write(blob);
             await writable.close();
             toast('File saved', 'success');
+            state.loadingPaths.delete(file.path);
+            updateFileButton(file);
             return;
           } catch (err) {
-            if (err.name === 'AbortError') return;
+            if (err.name === 'AbortError') {
+              state.loadingPaths.delete(file.path);
+              updateFileButton(file);
+              return;
+            }
           }
         }
 
@@ -968,6 +1025,8 @@
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
           toast('File saved', 'success');
+          state.loadingPaths.delete(file.path);
+          updateFileButton(file);
           return;
         } catch (err) {
           toast('Download failed', 'error');
@@ -975,10 +1034,14 @@
       } catch (e) {
         toast('Failed: ' + e.message, 'error');
       }
+      state.loadingPaths.delete(file.path);
+      updateFileButton(file);
     }
 
     async function runFile(file) {
       try {
+        state.loadingPaths.add(file.path);
+        updateFileButton(file);
         const content = await fetchFileContent(file.path);
         const ext = file.extension;
 
@@ -986,6 +1049,8 @@
           const w = window.open('about:blank', '_blank');
           if (!w) {
             toast('Pop-up blocked — allow pop-ups for this site', 'error');
+            state.loadingPaths.delete(file.path);
+            updateFileButton(file);
             return;
           }
           w.document.open();
@@ -996,272 +1061,233 @@
           const w = window.open('about:blank', '_blank');
           if (!w) {
             toast('Pop-up blocked — allow pop-ups for this site', 'error');
+            state.loadingPaths.delete(file.path);
+            updateFileButton(file);
             return;
           }
           w.document.open();
           w.document.write(html);
           w.document.close();
         }
-
-        toast('Launching ' + file.fullName, 'success');
+        state.loadingPaths.delete(file.path);
+        updateFileButton(file);
       } catch (e) {
         toast('Failed: ' + e.message, 'error');
+        state.loadingPaths.delete(file.path);
+        updateFileButton(file);
       }
     }
 
-    function renderMarkdown(md, title) {
-      let html = md
-        .replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>')
-        .replace(/`([^`]+)`/g, '<code>$1</code>')
-        .replace(/^#### (.+)$/gm, '<h4>$1</h4>')
-        .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-        .replace(/^## (.+)$/gm, '<h2>$1</h2>')
-        .replace(/^# (.+)$/gm, '<h1>$1</h1>')
-        .replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
-        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" style="max-width:100%;">')
-        .replace(/^---$/gm, '<hr>')
-        .replace(/^[\-\*] (.+)$/gm, '<li>$1</li>')
-        .replace(/^\d+\. (.+)$/gm, '<li>$1</li>')
-        .replace(/((<li>.*<\/li>\n?)+)/g, '<ul>$1</ul>')
-        .replace(/\n{2,}/g, '</p><p>')
-        .replace(/\n/g, '<br>');
-
-      return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>${title}</title>
-<style>
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:760px;margin:0 auto;padding:32px 24px;background:#0c0c0d;color:#e4e4e7;line-height:1.75;}
-h1{color:#F5A623;font-size:1.8em;margin:1.2em 0 0.4em;border-bottom:1px solid #222;padding-bottom:0.3em;}
-h2{color:#F5A623;font-size:1.4em;margin:1em 0 0.4em;}
-h3{color:#d4d4d8;font-size:1.15em;margin:0.8em 0 0.3em;}
-h4{color:#a1a1aa;font-size:1em;margin:0.6em 0 0.2em;}
-a{color:#F5A623;}code{background:#1a1a1e;padding:2px 7px;border-radius:4px;font-size:0.88em;color:#F5A623;}
-pre{background:#111214;padding:16px;border-radius:10px;overflow-x:auto;border:1px solid #282A2E;}
-pre code{background:none;padding:0;color:#d4d4d8;font-size:0.85em;}
-ul,ol{padding-left:24px;}li{margin:4px 0;}
-hr{border:none;border-top:1px solid #282A2E;margin:1.5em 0;}
-img{border-radius:8px;}
-p{margin:0.5em 0;}
-</style></head><body><p>${html}</p></body></html>`;
-    }
-
-    function togglePin(path) {
-      const idx = state.pinned.indexOf(path);
-      if (idx === -1) {
-        state.pinned.push(path);
-        toast('Pinned', 'success');
-      } else {
-        state.pinned.splice(idx, 1);
-        toast('Unpinned');
+    function updateFileButton(file) {
+      const btn = document.querySelector(`[data-path="${file.path}"]`);
+      if (btn) {
+        if (state.loadingPaths.has(file.path)) {
+          btn.classList.add('loading');
+        } else {
+          btn.classList.remove('loading');
+        }
       }
-      savePins();
-      renderPinned();
-      renderFiles();
     }
 
-    function openSidebar() {
-      document.getElementById('sidebar').classList.add('open');
-      document.getElementById('sidebarOverlay').classList.add('open');
+    function renderMarkdown(md, filename) {
+      const escaped = md.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      let html = `<pre style="font-family:monospace; white-space:pre-wrap; word-wrap:break-word;">${escaped}</pre>`;
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${filename}</title><style>body{background:#1a1a1a;color:#eee;padding:20px;font-family:system-ui;}</style></head><body>${html}</body></html>`;
     }
 
-    function closeSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-
-    function renderTabs() {
-      const bar = document.getElementById('tabBar');
-      let h = '';
-
-      const allCount = state.files.length;
-      h += `<button class="tab-item ${state.activeTab===''?'active':''}" data-tab="" role="tab" aria-selected="${state.activeTab===''}">All <span class="tab-count">${allCount}</span></button>`;
-
-      const foldersWithFiles = state.folders.filter(f => {
-        return state.files.some(fi => fi.folder === f && !fi.folder.includes(f + '/'));
-      });
-
-      for (const folder of foldersWithFiles) {
-        const label = folder.split('/').pop();
-        const count = state.files.filter(f => f.folder === folder).length;
-        const isActive = state.activeTab === folder;
-        h += `<button class="tab-item ${isActive?'active':''}" data-tab="${folder}" role="tab" aria-selected="${isActive}">${label} <span class="tab-count">${count}</span></button>`;
-      }
-
-      bar.innerHTML = h;
-      lucide.createIcons({
-        nodes: bar.querySelectorAll('[data-lucide]')
-      });
-    }
-
-    function sortFiles(files) {
-      const sorted = [...files];
+    function filterAndSortFiles() {
+      let f = state.files;
+      if (state.activeTab) f = f.filter(x => x.folder === state.activeTab);
+      if (state.searchQuery) f = f.filter(x => fuzzyMatch(state.searchQuery, x.name) || fuzzyMatch(state.searchQuery, x.fullName));
       
-      if (state.sortBy === 'name') {
-        sorted.sort((a, b) => a.name.localeCompare(b.name));
-      } else if (state.sortBy === 'name-desc') {
-        sorted.sort((a, b) => b.name.localeCompare(a.name));
-      } else if (state.sortBy === 'extension') {
-        sorted.sort((a, b) => {
-          if (a.extension !== b.extension) return a.extension.localeCompare(b.extension);
-          return a.name.localeCompare(b.name);
-        });
-      } else if (state.sortBy === 'size') {
-        sorted.sort((a, b) => {
-          if (a.size !== b.size) return a.size - b.size;
-          return a.name.localeCompare(b.name);
-        });
-      }
-
-      return sorted;
+      if (state.sortBy === 'name') f.sort((a, b) => a.name.localeCompare(b.name));
+      if (state.sortBy === 'name-desc') f.sort((a, b) => b.name.localeCompare(a.name));
+      if (state.sortBy === 'extension') f.sort((a, b) => a.extension.localeCompare(b.extension));
+      if (state.sortBy === 'size') f.sort((a, b) => a.size - b.size);
+      
+      return f;
     }
 
-    function renderFiles() {
+    function renderFileGrid() {
       const grid = document.getElementById('fileGrid');
-      let files = [...state.files];
-
-      if (state.activeTab !== '') {
-        files = files.filter(f => f.folder === state.activeTab);
-      }
-
-      if (state.searchQuery) {
-        const q = state.searchQuery.toLowerCase();
-        files = files.filter(f => f.name.toLowerCase().includes(q) || f.fullName.toLowerCase().includes(q) || f.path.toLowerCase().includes(q));
-      }
-
+      const files = filterAndSortFiles();
+      
       if (files.length === 0) {
-        grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1;">
-            <i data-lucide="folder-open" style="width:48px; height:48px; margin-bottom:14px; opacity:0.25;"></i>
-            <p style="font-size:15px; font-weight:600; margin-bottom:4px;">No files found</p>
-            <p style="font-size:12px;">Try a different tab or search term</p>
-        </div>`;
-        lucide.createIcons();
+        grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>' + (state.searchQuery ? 'No files match your search' : 'No files in this folder') + '</p></div>';
         return;
       }
-
-      files.sort((a, b) => {
-        const ap = state.pinned.includes(a.path) ? 0 : 1;
-        const bp = state.pinned.includes(b.path) ? 0 : 1;
-        if (ap !== bp) return ap - bp;
-        return 0;
-      });
-
-      files = sortFiles(files);
-
-      let h = '';
-      files.forEach((file, i) => {
-        const pinned = state.pinned.includes(file.path);
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        const label = extLabel(file.extension);
-        const delay = Math.min(i * 30, 400);
-        h += `<div class="file-btn" data-run="${file.path}" style="animation-delay:${delay}ms;" tabindex="0" role="button" aria-label="Run ${file.fullName}">
-            <button class="action-btn pin-btn ${pinned?'pinned':''}" data-pin="${file.path}" aria-label="${pinned?'Unpin':'Pin'} ${file.fullName}" title="${pinned?'Unpin':'Pin'}">
-                <i data-lucide="${pinned?'pin-off':'pin'}" style="width:13px; height:13px;"></i>
+      
+      grid.innerHTML = files.map(f => {
+        const isPinned = state.pinned.includes(f.path);
+        return `
+          <button class="file-btn" data-path="${f.path}" title="${f.fullName}">
+            <i class="file-icon" data-lucide="${fileIcon(f.extension)}" style="width:30px; height:30px;"></i>
+            <div class="file-name">${f.name}</div>
+            <div class="file-ext" style="background-color:${extColor(f.extension)}40;color:${extColor(f.extension)};">${extLabel(f.extension)}</div>
+            <button class="action-btn pin-btn ${isPinned ? 'pinned' : ''}" data-action="pin" title="${isPinned ? 'Unpin' : 'Pin'}">
+              <i data-lucide="pin" style="width:16px; height:16px;"></i>
             </button>
-            <button class="action-btn download-btn" data-download="${file.path}" aria-label="Download ${file.fullName}" title="Download">
-                <i data-lucide="download" style="width:13px; height:13px;"></i>
+            <button class="action-btn download-btn" data-action="download" title="Download">
+              <i data-lucide="download" style="width:16px; height:16px;"></i>
             </button>
-            <i data-lucide="${icon}" class="file-icon" style="color:${col};"></i>
-            <span class="file-name">${escHtml(file.name)}</span>
-            <span class="file-ext" style="color:${col}; background:${col}18;">${label}</span>
-        </div>`;
-      });
-
-      grid.innerHTML = h;
-      grid.className = state.viewMode === 'list' ? 'file-grid list-view' : 'file-grid';
+          </button>
+        `;
+      }).join('');
+      
       lucide.createIcons();
+      
+      grid.querySelectorAll('.file-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          if (e.target.closest('.action-btn')) return;
+          const path = btn.dataset.path;
+          const file = state.files.find(f => f.path === path);
+          if (file) runFile(file);
+        });
+      });
+
+      grid.querySelectorAll('[data-action="pin"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const path = btn.closest('.file-btn').dataset.path;
+          const idx = state.pinned.indexOf(path);
+          if (idx > -1) state.pinned.splice(idx, 1);
+          else state.pinned.push(path);
+          savePins();
+          renderFileGrid();
+          renderPinnedList();
+        });
+      });
+
+      grid.querySelectorAll('[data-action="download"]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const path = btn.closest('.file-btn').dataset.path;
+          const file = state.files.find(f => f.path === path);
+          if (file) downloadFile(file);
+        });
+      });
     }
 
-    function renderPinned() {
+    function renderPinnedList() {
       const list = document.getElementById('pinnedList');
       const empty = document.getElementById('pinnedEmpty');
-      const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
-
-      if (pinnedFiles.length === 0) {
+      const items = state.pinned.map(p => state.files.find(f => f.path === p)).filter(Boolean);
+      
+      if (items.length === 0) {
         list.innerHTML = '';
         empty.style.display = 'block';
         return;
       }
+      
       empty.style.display = 'none';
-
-      let h = '';
-      pinnedFiles.forEach((file, idx) => {
-        const icon = fileIcon(file.extension);
-        const col = extColor(file.extension);
-        h += `<button class="sidebar-item" data-run="${file.path}" draggable="true" data-pinned-idx="${idx}">
-            <i data-lucide="drag-handle" style="width:16px; height:16px; color:var(--muted); flex-shrink:0;"></i>
-            <i data-lucide="${icon}" style="width:16px; height:16px; color:${col}; flex-shrink:0;"></i>
-            <span style="flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${escHtml(file.name)}</span>
-            <i data-lucide="play" style="width:13px; height:13px; color:var(--muted); flex-shrink:0;"></i>
-        </button>`;
-      });
-      list.innerHTML = h;
+      list.innerHTML = items.map((f, i) => `
+        <div class="sidebar-item" data-pin-index="${i}" draggable="true">
+          <i data-lucide="${fileIcon(f.extension)}" style="width:16px; height:16px; color:${extColor(f.extension)};"></i>
+          <span style="flex:1;">${f.name}</span>
+        </div>
+      `).join('');
+      
       lucide.createIcons();
+      
+      const pinItems = list.querySelectorAll('.sidebar-item');
+      pinItems.forEach((el, i) => {
+        el.addEventListener('dragstart', () => {
+          state.draggedPinIndex = i;
+          el.classList.add('dragging');
+        });
+        el.addEventListener('dragend', () => {
+          pinItems.forEach(e => e.classList.remove('dragging', 'drag-over'));
+        });
+        el.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          if (state.draggedPinIndex === null) return;
+          el.classList.add('drag-over');
+        });
+        el.addEventListener('dragleave', () => {
+          el.classList.remove('drag-over');
+        });
+        el.addEventListener('drop', (e) => {
+          e.preventDefault();
+          el.classList.remove('drag-over');
+          if (state.draggedPinIndex === null || state.draggedPinIndex === i) return;
+          const draggedPath = state.pinned[state.draggedPinIndex];
+          state.pinned.splice(state.draggedPinIndex, 1);
+          state.pinned.splice(i, 0, draggedPath);
+          savePins();
+          renderPinnedList();
+        });
+        el.addEventListener('click', () => {
+          const file = items[i];
+          runFile(file);
+        });
+      });
     }
 
-    function escHtml(s) {
-      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    function renderTabs() {
+      const tabBar = document.getElementById('tabBar');
+      const tabs = [
+        { folder: '', label: 'All', count: state.files.length },
+        ...state.folders.map(f => ({
+          folder: f,
+          label: f.split('/').pop(),
+          count: state.files.filter(x => x.folder === f).length
+        }))
+      ];
+      
+      tabBar.innerHTML = tabs.map(t => `
+        <button class="tab-item ${state.activeTab === t.folder ? 'active' : ''}" data-folder="${t.folder}">
+          ${t.label}
+          <span class="tab-count">${t.count}</span>
+        </button>
+      `).join('');
+      
+      tabBar.querySelectorAll('.tab-item').forEach(btn => {
+        btn.addEventListener('click', () => {
+          state.activeTab = btn.dataset.folder;
+          renderTabs();
+          renderFileGrid();
+        });
+      });
     }
 
-    function showLoading() {
-      const grid = document.getElementById('fileGrid');
-      let h = '';
-      for (let i = 0; i < 12; i++) h += '<div class="skeleton"></div>';
-      grid.innerHTML = h;
-    }
-
-    function updateFileCount() {
-      const el = document.getElementById('fileCount');
-      let files = state.files;
-      if (state.activeTab !== '') files = files.filter(f => f.folder === state.activeTab);
-      el.textContent = files.length + ' file' + (files.length !== 1 ? 's' : '');
-    }
-
-    async function refreshRepo() {
-      closeSidebar();
-      showLoading();
+    async function init() {
       try {
+        loadPins();
+        loadPreferences();
         const branch = await fetchDefaultBranch(state.owner, state.repo);
         state.branch = branch;
-
+        document.getElementById('repoTitle').textContent = state.repo;
+        document.getElementById('repoSubtitle').textContent = branch;
         const tree = await fetchTree(state.owner, state.repo, branch);
         const parsed = parseTree(tree);
         state.files = parsed.files;
         state.folders = parsed.folders;
-
-        const paths = new Set(state.files.map(f => f.path));
-        state.pinned = state.pinned.filter(p => paths.has(p));
-        savePins();
-
-        document.getElementById('repoTitle').textContent = state.repo;
-        document.getElementById('repoSubtitle').textContent = state.owner + ' / ' + state.branch;
-
+        document.getElementById('fileCount').textContent = state.files.length + ' files';
         renderTabs();
-        renderFiles();
-        renderPinned();
-        updateFileCount();
-        toast('Loaded ' + state.files.length + ' files', 'success');
+        renderFileGrid();
+        renderPinnedList();
       } catch (e) {
         toast(e.message, 'error');
       }
     }
 
-    function getFileByPath(path) {
-      return state.files.find(f => f.path === path);
-    }
+    const searchInput = document.getElementById('searchInput');
+    searchInput.addEventListener('input', (e) => {
+      state.searchQuery = e.target.value;
+      renderFileGrid();
+    });
 
-    document.getElementById('openSidebarBtn').addEventListener('click', openSidebar);
-    document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
-    document.getElementById('sidebarOverlay').addEventListener('click', closeSidebar);
-    document.getElementById('refreshBtn').addEventListener('click', refreshRepo);
-    document.getElementById('sidebarRefresh').addEventListener('click', refreshRepo);
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      state.searchQuery = '';
+      renderFileGrid();
+    });
 
-    document.getElementById('sortDropdown').addEventListener('change', e => {
+    document.getElementById('sortDropdown').addEventListener('change', (e) => {
       state.sortBy = e.target.value;
       saveSortPreference();
-      renderFiles();
+      renderFileGrid();
     });
 
     document.getElementById('gridViewBtn').addEventListener('click', () => {
@@ -1269,7 +1295,7 @@ p{margin:0.5em 0;}
       saveViewPreference();
       document.getElementById('gridViewBtn').classList.add('active');
       document.getElementById('listViewBtn').classList.remove('active');
-      renderFiles();
+      document.getElementById('fileGrid').classList.remove('list-view');
     });
 
     document.getElementById('listViewBtn').addEventListener('click', () => {
@@ -1277,127 +1303,34 @@ p{margin:0.5em 0;}
       saveViewPreference();
       document.getElementById('listViewBtn').classList.add('active');
       document.getElementById('gridViewBtn').classList.remove('active');
-      renderFiles();
+      document.getElementById('fileGrid').classList.add('list-view');
     });
 
-    document.getElementById('sortDropdown').value = state.sortBy;
+    document.getElementById('openSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('sidebarOverlay').classList.add('open');
+    });
+
+    document.getElementById('closeSidebarBtn').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    });
+
+    document.getElementById('sidebarOverlay').addEventListener('click', () => {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    });
+
+    document.getElementById('refreshBtn').addEventListener('click', init);
+    document.getElementById('sidebarRefresh').addEventListener('click', init);
+
     if (state.viewMode === 'list') {
       document.getElementById('listViewBtn').classList.add('active');
       document.getElementById('gridViewBtn').classList.remove('active');
+      document.getElementById('fileGrid').classList.add('list-view');
     }
 
-    document.getElementById('searchInput').addEventListener('input', e => {
-      state.searchQuery = e.target.value;
-      renderFiles();
-      updateFileCount();
-    });
-
-    document.getElementById('clearSearchBtn').addEventListener('click', () => {
-      document.getElementById('searchInput').value = '';
-      state.searchQuery = '';
-      renderFiles();
-      updateFileCount();
-    });
-
-    document.getElementById('tabBar').addEventListener('click', e => {
-      const btn = e.target.closest('.tab-item');
-      if (btn) {
-        state.activeTab = btn.getAttribute('data-tab');
-        renderTabs();
-        renderFiles();
-        updateFileCount();
-      }
-    });
-
-    document.getElementById('fileGrid').addEventListener('click', e => {
-      const pinBtn = e.target.closest('.pin-btn');
-      if (pinBtn) {
-        e.stopPropagation();
-        togglePin(pinBtn.getAttribute('data-pin'));
-        return;
-      }
-
-      const dlBtn = e.target.closest('.download-btn');
-      if (dlBtn) {
-        e.stopPropagation();
-        const file = getFileByPath(dlBtn.getAttribute('data-download'));
-        if (file) downloadFile(file);
-        return;
-      }
-
-      const fileBtn = e.target.closest('.file-btn');
-      if (fileBtn) {
-        const file = getFileByPath(fileBtn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
-    });
-
-    document.getElementById('fileGrid').addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        const fileBtn = e.target.closest('.file-btn');
-        if (fileBtn) {
-          const file = getFileByPath(fileBtn.getAttribute('data-run'));
-          if (file) runFile(file);
-        }
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragstart', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        state.draggedPinIndex = parseInt(btn.getAttribute('data-pinned-idx'));
-        btn.classList.add('dragging');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragend', e => {
-      document.querySelectorAll('.sidebar-item').forEach(item => item.classList.remove('dragging', 'drag-over'));
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragover', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.add('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('dragleave', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn) {
-        btn.classList.remove('drag-over');
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('drop', e => {
-      e.preventDefault();
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && state.draggedPinIndex !== null) {
-        const targetIdx = parseInt(btn.getAttribute('data-pinned-idx'));
-        const pinnedFiles = state.files.filter(f => state.pinned.includes(f.path));
-        
-        if (state.draggedPinIndex !== targetIdx) {
-          const draggedPin = state.pinned[state.draggedPinIndex];
-          state.pinned.splice(state.draggedPinIndex, 1);
-          state.pinned.splice(targetIdx, 0, draggedPin);
-          savePins();
-          renderPinned();
-        }
-      }
-    });
-
-    document.getElementById('pinnedList').addEventListener('click', e => {
-      const btn = e.target.closest('.sidebar-item');
-      if (btn && !e.target.closest('[data-pinned-idx]')) {
-        const file = getFileByPath(btn.getAttribute('data-run'));
-        if (file) runFile(file);
-      }
-    });
-
-    loadPins();
-    loadPreferences();
-    refreshRepo();
+    init();
   </script>
 </body>
 
