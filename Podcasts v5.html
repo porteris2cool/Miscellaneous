@@ -49,10 +49,12 @@
     input { font-family: inherit; border: none; background: none; color: inherit; outline: none; }
     img { display: block; }
 
+    /* Scrollbar */
     ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--surface-3); border-radius: 2px; }
 
+    /* ========== LAYOUT ========== */
     #app {
       display: flex; flex-direction: column;
       height: 100dvh; position: relative; overflow: hidden;
@@ -87,6 +89,7 @@
       padding-bottom: calc(var(--tab-h) + var(--player-h) + var(--safe-b) + 24px);
     }
 
+    /* ========== TAB BAR ========== */
     #tab-bar {
       flex-shrink: 0; display: flex; align-items: stretch;
       background: var(--bg-2); border-top: 1px solid var(--border);
@@ -111,6 +114,7 @@
     }
     .tab-btn.active::before { opacity: 1; }
 
+    /* ========== MINI PLAYER ========== */
     #mini-player {
       flex-shrink: 0; height: 0; overflow: hidden;
       background: var(--surface); border-top: 1px solid var(--border);
@@ -152,6 +156,7 @@
     }
     .mini-play:active { transform: scale(0.9); }
 
+    /* ========== FULL PLAYER ========== */
     #full-player {
       position: fixed; inset: 0; z-index: 200;
       background: var(--bg); display: flex; flex-direction: column;
@@ -233,6 +238,7 @@
     }
     .fp-speed:active { background: var(--accent-dim); }
 
+    /* ========== SEARCH ========== */
     .search-bar {
       display: flex; align-items: center; gap: 10px;
       background: var(--surface); border: 1px solid var(--border);
@@ -250,6 +256,7 @@
     }
     .search-clear.visible { display: flex; }
 
+    /* ========== CARDS ========== */
     .pod-card {
       display: flex; align-items: center; gap: 14px;
       padding: 12px; border-radius: var(--radius);
@@ -295,22 +302,18 @@
       font-size: 12px; color: var(--text-3); margin-top: 3px;
       display: flex; gap: 8px; align-items: center;
     }
-    .ep-actions {
-      display: flex; gap: 8px; flex-shrink: 0;
-    }
     .ep-dl-btn {
-      flex: 1; min-width: 56px; padding: 10px 12px; border-radius: 8px;
+      width: 36px; height: 36px; border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
-      color: var(--text-3); font-size: 16px; flex-shrink: 0;
+      color: var(--text-3); font-size: 14px; flex-shrink: 0;
       transition: color 0.15s, background 0.15s;
-      background: var(--surface-2); border: 1px solid var(--border);
-      gap: 6px; white-space: nowrap;
     }
     .ep-dl-btn:active { background: var(--surface-3); color: var(--text-2); }
     .ep-dl-btn.staging { color: var(--accent); }
     .ep-dl-btn.done { color: var(--success); }
     .ep-dl-btn.failed { color: var(--error); }
 
+    /* ========== OVERLAY (PODCAST DETAIL) ========== */
     #podcast-detail {
       position: fixed; inset: 0; z-index: 150;
       background: var(--bg); display: flex; flex-direction: column;
@@ -391,6 +394,7 @@
       margin-bottom: 4px;
     }
 
+    /* ========== FOLLOWING FEED ========== */
     .feed-ep {
       display: flex; gap: 12px; padding: 14px 0;
       border-bottom: 1px solid var(--border);
@@ -416,21 +420,10 @@
       display: flex; gap: 8px; align-items: center;
     }
     .feed-ep-actions {
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0;
+      display: flex; align-items: center; gap: 4px; flex-shrink: 0;
     }
-    .feed-ep-btn {
-      min-width: 56px; padding: 8px 12px; border-radius: 8px;
-      display: flex; align-items: center; justify-content: center;
-      color: var(--text-3); font-size: 16px; flex-shrink: 0;
-      transition: color 0.15s, background 0.15s;
-      background: var(--surface-2); border: 1px solid var(--border);
-      gap: 4px;
-    }
-    .feed-ep-btn:active { background: var(--surface-3); color: var(--text-2); }
-    .feed-ep-btn.staging { color: var(--accent); }
-    .feed-ep-btn.done { color: var(--success); }
-    .feed-ep-btn.failed { color: var(--error); }
 
+    /* ========== SETTINGS ========== */
     .settings-section {
       margin-bottom: 28px;
     }
@@ -468,6 +461,7 @@
       border-color: var(--accent);
     }
 
+    /* ========== DOWNLOAD MODAL ========== */
     .modal-overlay {
       position: fixed; inset: 0; z-index: 300;
       background: rgba(0,0,0,0.65); display: flex;
@@ -499,6 +493,7 @@
       font-size: 14px; font-weight: 600;
     }
 
+    /* ========== TOASTS ========== */
     #toast-container {
       position: fixed; top: calc(16px + var(--safe-t)); left: 16px; right: 16px;
       z-index: 400; display: flex; flex-direction: column; gap: 8px;
@@ -515,6 +510,7 @@
     .toast.success { border-color: var(--success); color: var(--success); }
     .toast.error { border-color: var(--error); color: var(--error); }
 
+    /* ========== EMPTY STATE ========== */
     .empty-state {
       display: flex; flex-direction: column; align-items: center;
       justify-content: center; padding: 60px 32px; text-align: center;
@@ -532,6 +528,7 @@
       font-size: 13px; color: var(--text-3); line-height: 1.5; max-width: 260px;
     }
 
+    /* ========== SKELETON ========== */
     .skel {
       border-radius: var(--radius-sm);
       background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
@@ -542,6 +539,7 @@
 
     .skel-card { height: 80px; margin-bottom: 8px; border-radius: var(--radius); }
 
+    /* ========== DOWNLOADS LIST ========== */
     .dl-item {
       display: flex; align-items: center; gap: 12px;
       padding: 12px 0; border-bottom: 1px solid var(--border);
@@ -561,17 +559,12 @@
     .dl-item-sub {
       font-size: 12px; color: var(--text-3); margin-top: 2px;
     }
-    .dl-item-actions {
-      display: flex; gap: 8px; flex-shrink: 0;
+    .dl-item-redl {
+      font-size: 12px; color: var(--accent); font-weight: 600;
+      padding: 6px 10px;
     }
-    .dl-item-btn {
-      padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 600;
-      border: 1px solid var(--border); background: var(--surface-2);
-      color: var(--text-2); transition: all 0.15s;
-    }
-    .dl-item-btn.danger { color: var(--error); border-color: var(--error); }
-    .dl-item-btn:active { background: var(--surface-3); }
 
+    /* ========== UTILITY ========== */
     .hidden { display: none !important; }
     .spinner { animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -583,6 +576,7 @@
       }
     }
 
+    /* Subtle ambient glow */
     #app::before {
       content: ''; position: fixed; top: -30%; left: -20%;
       width: 60%; height: 60%; border-radius: 50%;
@@ -594,6 +588,7 @@
 <body>
   <div id="app">
     <div id="views">
+      <!-- SEARCH VIEW -->
       <section id="view-search" class="view active">
         <div class="view-header">
           <h1>Search</h1>
@@ -614,6 +609,7 @@
         </div>
       </section>
 
+      <!-- FOLLOWING VIEW -->
       <section id="view-following" class="view">
         <div class="view-header">
           <h1>Following</h1>
@@ -627,6 +623,7 @@
         </div>
       </section>
 
+      <!-- DOWNLOADS VIEW -->
       <section id="view-downloads" class="view">
         <div class="view-header">
           <h1>Downloads</h1>
@@ -640,6 +637,7 @@
         </div>
       </section>
 
+      <!-- SETTINGS VIEW -->
       <section id="view-settings" class="view">
         <div class="view-header">
           <h1>Settings</h1>
@@ -667,7 +665,7 @@
             <div class="settings-group">
               <div class="settings-item">
                 <span class="settings-item-label">Podflow</span>
-                <span class="settings-item-value">v1.1</span>
+                <span class="settings-item-value">v1.0</span>
               </div>
               <div class="settings-item">
                 <span class="settings-item-label">Search API</span>
@@ -683,6 +681,7 @@
       </section>
     </div>
 
+    <!-- MINI PLAYER -->
     <div id="mini-player">
       <div class="mini-progress"><div id="mini-progress-fill" class="mini-progress-fill"></div></div>
       <div class="mini-inner" onclick="openFullPlayer()">
@@ -697,6 +696,7 @@
       </div>
     </div>
 
+    <!-- TAB BAR -->
     <nav id="tab-bar">
       <button class="tab-btn active" data-tab="search" aria-label="Search">
         <i class="fas fa-magnifying-glass"></i><span>Search</span>
@@ -713,6 +713,7 @@
     </nav>
   </div>
 
+  <!-- PODCAST DETAIL OVERLAY -->
   <div id="podcast-detail">
     <div class="detail-header">
       <button class="detail-back" onclick="closePodcastDetail()" aria-label="Back"><i class="fas fa-chevron-left"></i></button>
@@ -727,6 +728,7 @@
     </div>
   </div>
 
+  <!-- FULL PLAYER OVERLAY -->
   <div id="full-player">
     <div class="fp-header">
       <button onclick="closeFullPlayer()" aria-label="Minimize"><i class="fas fa-chevron-down"></i></button>
@@ -755,6 +757,7 @@
     </div>
   </div>
 
+  <!-- DOWNLOAD MODAL -->
   <div id="download-modal" class="modal-overlay">
     <div class="modal-card">
       <h3 id="dl-modal-title">Downloading</h3>
@@ -765,106 +768,64 @@
     </div>
   </div>
 
+  <!-- TOAST CONTAINER -->
   <div id="toast-container"></div>
 
   <audio id="audio" preload="metadata"></audio>
 
   <script>
+    // ========================================
     // CONFIGURATION
+    // ========================================
+    const PROXIES = [
+/*       'https://api.allorigins.win/raw?url=',
+      'https://corsproxy.io/?' */
+    ];
     const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    const MAX_FEED_EPISODES = 5;
-    const DB_NAME = 'PodflowDownloads';
-    const STORE_NAME = 'episodes';
-    const CHUNK_SIZE = 1024 * 256; // 256KB chunks
+    const MAX_FEED_EPISODES = 5; // per followed podcast
 
+    // ========================================
     // STATE
+    // ========================================
     const state = {
       currentTab: 'search',
       follows: JSON.parse(localStorage.getItem('pf_follows') || '[]'),
       downloads: JSON.parse(localStorage.getItem('pf_downloads') || '[]'),
       searchHistory: JSON.parse(localStorage.getItem('pf_search_history') || '[]'),
       speed: parseFloat(localStorage.getItem('pf_speed') || '1'),
-      currentPodcast: null,
-      currentEpisodes: [],
-      currentEpisode: null,
+      currentPodcast: null,  // {title, image, rss, artist}
+      currentEpisodes: [],   // parsed episodes for current detail view
+      currentEpisode: null,  // currently playing episode
       isPlaying: false,
-      downloading: new Map(),
-      dlQueue: [],
+      downloadAllCancelled: false,
     };
 
+    // ========================================
     // DOM REFERENCES
+    // ========================================
     const $ = id => document.getElementById(id);
     const audio = $('audio');
 
-    // IndexedDB functions
-    function openDB() {
-      return new Promise((resolve, reject) => {
-        const req = indexedDB.open(DB_NAME, 1);
-        req.onupgradeneeded = (e) => {
-          const db = e.target.result;
-          if (!db.objectStoreNames.contains(STORE_NAME)) {
-            db.createObjectStore(STORE_NAME, { keyPath: 'id' });
-          }
-        };
-        req.onerror = () => reject(req.error);
-        req.onsuccess = () => resolve(req.result);
-      });
-    }
-
-    async function storeDownload(episodeId, episodeTitle, podcastTitle, data, ext, url) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const record = {
-          id: episodeId,
-          title: episodeTitle,
-          podcast: podcastTitle,
-          blob: data,
-          ext: ext,
-          url: url,
-          timestamp: Date.now(),
-        };
-        const req = store.put(record);
-        req.onsuccess = () => resolve(record);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function getDownload(episodeId) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.get(episodeId);
-        req.onsuccess = () => resolve(req.result || null);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function getAllDownloads() {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readonly');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.getAll();
-        req.onsuccess = () => resolve(req.result);
-        req.onerror = () => reject(req.error);
-      });
-    }
-
-    async function deleteDownload(episodeId) {
-      const db = await openDB();
-      return new Promise((resolve, reject) => {
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const store = tx.objectStore(STORE_NAME);
-        const req = store.delete(episodeId);
-        req.onsuccess = () => resolve();
-        req.onerror = () => reject(req.error);
-      });
-    }
-
+    // ========================================
     // UTILITIES
+    // ========================================
+
+    async function fetchWithProxy(url) {
+      // Try direct
+      try {
+        const r = await fetch(url);
+        if (r.ok) return r;
+      } catch(e) {}
+      // Try each proxy
+      for (const proxy of PROXIES) {
+        try {
+          const r = await fetch(proxy + encodeURIComponent(url));
+          if (r.ok) return r;
+        } catch(e) { continue; }
+      }
+      throw new Error('Fetch failed');
+    }
+
     function parseRSS(xmlText) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(xmlText, 'text/xml');
@@ -881,13 +842,11 @@
       const episodes = Array.from(items).map(item => {
         const enc = item.querySelector('enclosure');
         const dur = item.querySelector('itunes\\:duration')?.textContent || '';
-        const guid = item.querySelector('guid')?.textContent || '';
         return {
           title: item.querySelector('title')?.textContent || 'Untitled',
           url: enc?.getAttribute('url') || '',
           date: item.querySelector('pubDate')?.textContent || '',
           duration: dur,
-          id: guid || enc?.getAttribute('url') || Math.random().toString(36),
         };
       }).filter(ep => ep.url);
 
@@ -924,14 +883,6 @@
       const m = Math.floor(sec / 60);
       const s = Math.floor(sec % 60);
       return `${m}:${s.toString().padStart(2, '0')}`;
-    }
-
-    function formatBytes(bytes) {
-      if (bytes === 0) return '0 B';
-      const k = 1024;
-      const sizes = ['B', 'KB', 'MB', 'GB'];
-      const i = Math.floor(Math.log(bytes) / Math.log(k));
-      return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
     }
 
     function getAudioExt(url) {
@@ -974,7 +925,10 @@
       return s.replace(/&/g,'&amp;').replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     }
 
+    // ========================================
     // NAVIGATION
+    // ========================================
+
     function switchTab(tab) {
       state.currentTab = tab;
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
@@ -990,7 +944,10 @@
       btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
+    // ========================================
     // SEARCH
+    // ========================================
+
     const searchInput = $('search-input');
     const searchClear = $('search-clear');
     let searchTimeout;
@@ -1026,9 +983,7 @@
             <div class="settings-label">Recent Searches</div>
             <div style="display:flex;flex-wrap:wrap;gap:8px">
               ${state.searchHistory.map(q => `
-                <button onclick="doSearch('${escAttr(q)}')" style="padding:6px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text-2)">
-                  ${escAttr(q)}
-                </button>
+                <button onclick="doSearch('${escAttr(q)}')" style="padding:6px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--border);font-size:13px;font-weight:500;color:var(--text-2)">${q}</button>
               `).join('')}
             </div>
           </div>
@@ -1045,153 +1000,199 @@
     }
 
     async function doSearch(query) {
-      if (!query.trim()) return;
-
+      if (!query) return;
       searchInput.value = query;
-      if (!state.searchHistory.includes(query)) {
-        state.searchHistory.unshift(query);
-        if (state.searchHistory.length > 20) state.searchHistory.pop();
-        saveState();
-      }
+      searchClear.classList.add('visible');
 
-      $('search-content').innerHTML = `
-        <div class="skel-card"></div>
-        <div class="skel-card"></div>
-        <div class="skel-card"></div>
-      `;
+      // Save history
+      state.searchHistory = [query, ...state.searchHistory.filter(q => q !== query)].slice(0, 10);
+      saveState();
+
+      // Show skeletons
+      $('search-content').innerHTML = Array(5).fill('<div class="skel skel-card"></div>').join('');
 
       try {
-        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&entity=podcast&limit=50`);
+        const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=podcast&limit=25`);
         const data = await res.json();
 
-        if (!data.results || data.results.length === 0) {
+        if (data.results.length === 0) {
           $('search-content').innerHTML = `
             <div class="empty-state">
-              <div class="empty-icon"><i class="fas fa-search"></i></div>
+              <div class="empty-icon"><i class="fas fa-face-meh"></i></div>
               <div class="empty-title">No results</div>
-              <div class="empty-sub">Try another search term</div>
+              <div class="empty-sub">Try a different search term</div>
             </div>
           `;
           return;
         }
 
-        $('search-content').innerHTML = data.results.map(pod => `
-          <div class="pod-card" onclick="openPodcastDetail('${encodeURIComponent(pod.feedUrl)}', '${escAttr(pod.collectionName)}', '${escAttr(pod.artworkUrl600 || '')}', '${escAttr(pod.artistName || '')}')">
-            <img src="${escAttr(pod.artworkUrl100 || '')}" class="pod-card-art" alt="" onerror="this.style.background='var(--surface-3)'" loading="lazy">
-            <div class="pod-card-info">
-              <div class="pod-card-title">${escAttr(pod.collectionName)}</div>
-              <div class="pod-card-artist">${escAttr(pod.artistName || '')}</div>
+        const podcasts = data.results.filter(r => r.feedUrl).map(r => ({
+          title: r.collectionName,
+          artist: r.artistName,
+          image: r.artworkUrl600 || r.artworkUrl100,
+          rss: r.feedUrl
+        }));
+
+        $('search-content').innerHTML = `
+          <div>${podcasts.map(p => `
+            <div class="pod-card" onclick="openPodcastDetail('${escAttr(p.rss)}','${escAttr(p.title)}','${escAttr(p.image)}','${escAttr(p.artist)}')">
+              <img class="pod-card-art" src="${p.image}" alt="" loading="lazy" onerror="this.style.background='var(--surface-3)'">
+              <div class="pod-card-info">
+                <div class="pod-card-title">${p.title}</div>
+                <div class="pod-card-artist">${p.artist}</div>
+              </div>
+              <i class="fas fa-chevron-right pod-card-chevron"></i>
             </div>
-            <i class="fas fa-chevron-right pod-card-chevron"></i>
-          </div>
-        `).join('');
+          `).join('')}</div>
+        `;
       } catch(e) {
         $('search-content').innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="empty-title">Connection error</div>
-            <div class="empty-sub">Could not fetch results. Check your connection</div>
+            <div class="empty-icon"><i class="fas fa-wifi" style="color:var(--error)"></i></div>
+            <div class="empty-title">Search failed</div>
+            <div class="empty-sub">Check your connection and try again</div>
           </div>
         `;
       }
     }
 
-    async function openPodcastDetail(rssEncoded, title, image, artist) {
-      const rss = decodeURIComponent(rssEncoded);
+    // ========================================
+    // PODCAST DETAIL
+    // ========================================
+
+    async function openPodcastDetail(rss, title, image, artist) {
       state.currentPodcast = { rss, title, image, artist };
+      state.currentEpisodes = [];
 
+      const detail = $('podcast-detail');
       $('detail-header-title').textContent = title;
-      const followBtn = $('detail-follow-btn');
-      const isFollowed = isFollowing(rss);
-      followBtn.className = `detail-follow-btn ${isFollowed ? 'following' : 'not-following'}`;
-      followBtn.innerHTML = `<i class="fas fa-${isFollowed ? 'heart' : 'plus'}"></i> ${isFollowed ? 'Following' : 'Follow'}`;
+      updateFollowButton();
 
+      // Show hero with skeleton
       $('detail-hero').innerHTML = `
-        <img src="${escAttr(image)}" class="detail-art" alt="" onerror="this.style.background='var(--surface-3)'">
+        <img class="detail-art" src="${image}" alt="" onerror="this.style.background='var(--surface-3)'">
         <div class="detail-hero-info">
-          <div class="detail-hero-title">${escAttr(title)}</div>
-          <div class="detail-hero-artist">${escAttr(artist)}</div>
-          <div class="detail-hero-count" id="detail-ep-count">Loading...</div>
+          <div class="detail-hero-title">${title}</div>
+          <div class="detail-hero-artist">${artist}</div>
+          <div class="detail-hero-count">Loading episodes...</div>
         </div>
       `;
+      $('detail-actions').innerHTML = '';
+      $('detail-eps-list').innerHTML = Array(8).fill('<div class="skel" style="height:60px;margin:8px 0"></div>').join('');
 
-      $('detail-actions').innerHTML = `
-        <button class="action-btn secondary" onclick="loadFollowingFeed(); closePodcastDetail()"><i class="fas fa-arrow-left"></i> Back</button>
-      `;
-
-      $('detail-eps-list').innerHTML = '<div class="skel-card"></div><div class="skel-card"></div>';
+      detail.classList.add('open');
 
       try {
-        const res = await fetch(rss);
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const xml = await res.text();
-        const { episodes } = parseRSS(xml);
+        const res = await fetchWithProxy(rss);
+        const text = await res.text();
+        const parsed = parseRSS(text);
+        const episodes = parsed.episodes;
 
-        $('detail-ep-count').textContent = `${episodes.length} episode${episodes.length !== 1 ? 's' : ''}`;
+        // Update with better data from RSS
+        if (parsed.image) state.currentPodcast.image = parsed.image;
+        if (parsed.artist) state.currentPodcast.artist = parsed.artist;
+        state.currentEpisodes = episodes;
 
-        $('detail-eps-list').innerHTML = episodes.slice(0, MAX_FEED_EPISODES).map((ep, i) => {
-          const hasDownload = state.downloads.some(d => d.id === ep.id);
-          return `
-            <div class="feed-ep">
-              <button class="ep-play-btn" onclick="playEpisode(${i}, ${JSON.stringify(episodes).replace(/"/g, '&quot;')})">
-                <i class="fas fa-play"></i>
-              </button>
-              <div class="feed-ep-info">
-                <div class="feed-ep-pod">${escAttr(title)}</div>
-                <div class="feed-ep-title">${escAttr(ep.title)}</div>
-                <div class="feed-ep-meta">
-                  <span>${formatDate(ep.date)}</span>
-                  ${ep.duration ? `<span>${formatDuration(ep.duration)}</span>` : ''}
-                </div>
-              </div>
-              <div class="feed-ep-actions">
-                <button class="feed-ep-btn${hasDownload ? ' done' : ''}" id="feed-dl-${i}" onclick="event.stopPropagation(); startDownloadEpisode('${escAttr(ep.url)}', '${escAttr(ep.title)}', '${escAttr(title)}', '${ep.id}', 'feed-dl-${i}')">
-                  <i class="fas fa-${hasDownload ? 'check' : 'download'}"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch(e) {
-        $('detail-eps-list').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="empty-title">Error loading episodes</div>
-            <div class="empty-sub">${escAttr(e.message)}</div>
+        const img = parsed.image || image;
+        $('detail-hero').innerHTML = `
+          <img class="detail-art" src="${img}" alt="" onerror="this.style.background='var(--surface-3)'">
+          <div class="detail-hero-info">
+            <div class="detail-hero-title">${parsed.title || title}</div>
+            <div class="detail-hero-artist">${parsed.artist || artist}</div>
+            <div class="detail-hero-count">${episodes.length} episode${episodes.length !== 1 ? 's' : ''}</div>
           </div>
         `;
-      }
 
-      $('podcast-detail').classList.add('open');
+        // Action buttons
+        const hasFSA = 'showDirectoryPicker' in window;
+        $('detail-actions').innerHTML = `
+          <button class="action-btn primary" onclick="downloadAllPodcast()">
+            <i class="fas fa-folder-down"></i> Download All
+          </button>
+          ${!hasFSA ? '<div style="font-size:11px;color:var(--text-3);text-align:center;width:100%">Folder download requires Chrome on desktop</div>' : ''}
+          <button class="action-btn secondary" onclick="copyRSSLink()">
+            <i class="fas fa-link"></i> Copy RSS
+          </button>
+        `;
+
+        // Episode list
+        renderDetailEpisodes(episodes);
+      } catch(e) {
+        $('detail-eps-list').innerHTML = `
+          <div class="empty-state" style="padding:32px 0">
+            <div class="empty-icon"><i class="fas fa-triangle-exclamation" style="color:var(--error)"></i></div>
+            <div class="empty-title">Failed to load episodes</div>
+            <div class="empty-sub">The RSS feed could not be reached</div>
+          </div>
+        `;
+        $('detail-actions').innerHTML = '';
+      }
+    }
+
+    function renderDetailEpisodes(episodes) {
+      $('detail-eps-list').innerHTML = episodes.map((ep, i) => `
+        <div class="ep-item">
+          <button class="ep-play-btn" onclick="playEpisodeFromDetail(${i})" aria-label="Play">
+            <i class="fas fa-play"></i>
+          </button>
+          <div class="ep-info">
+            <div class="ep-title">${ep.title}</div>
+            <div class="ep-meta">
+              <span>${formatDate(ep.date)}</span>
+              ${ep.duration ? `<span>&middot;</span><span>${formatDuration(ep.duration)}</span>` : ''}
+            </div>
+          </div>
+          <button id="ep-dl-${i}" class="ep-dl-btn" onclick="downloadSingleEpisode(${i})" aria-label="Download">
+            <i class="fas fa-circle-down"></i>
+          </button>
+        </div>
+      `).join('');
     }
 
     function closePodcastDetail() {
       $('podcast-detail').classList.remove('open');
-      state.currentPodcast = null;
+    }
+
+    function updateFollowButton() {
+      const btn = $('detail-follow-btn');
+      if (!state.currentPodcast) return;
+      const following = isFollowing(state.currentPodcast.rss);
+      btn.className = `detail-follow-btn ${following ? 'following' : 'not-following'}`;
+      btn.innerHTML = following
+        ? '<i class="fas fa-heart"></i> Following'
+        : '<i class="far fa-heart"></i> Follow';
     }
 
     function toggleFollowFromDetail() {
       if (!state.currentPodcast) return;
       const { rss, title, image, artist } = state.currentPodcast;
-      const isFollowed = isFollowing(rss);
-
-      if (isFollowed) {
+      if (isFollowing(rss)) {
         state.follows = state.follows.filter(f => f.rss !== rss);
+        showToast(`Unfollowed ${title}`);
       } else {
-        state.follows.push({ rss, title, image, artist });
+        state.follows.push({ rss, title, image, artist, addedAt: Date.now() });
+        showToast(`Following ${title}`, 'success');
       }
       saveState();
-
-      const btn = $('detail-follow-btn');
-      const newIsFollowed = isFollowing(rss);
-      btn.className = `detail-follow-btn ${newIsFollowed ? 'following' : 'not-following'}`;
-      btn.innerHTML = `<i class="fas fa-${newIsFollowed ? 'heart' : 'plus'}"></i> ${newIsFollowed ? 'Following' : 'Follow'}`;
-      showToast(newIsFollowed ? 'Added to following' : 'Removed from following', newIsFollowed ? 'success' : '');
+      updateFollowButton();
     }
 
+    function copyRSSLink() {
+      if (!state.currentPodcast) return;
+      navigator.clipboard.writeText(state.currentPodcast.rss)
+        .then(() => showToast('RSS link copied', 'success'))
+        .catch(() => showToast('Failed to copy'));
+    }
+
+    // ========================================
+    // FOLLOWING FEED
+    // ========================================
+
     async function loadFollowingFeed() {
+      const container = $('following-content');
+
       if (state.follows.length === 0) {
-        $('following-content').innerHTML = `
+        container.innerHTML = `
           <div class="empty-state">
             <div class="empty-icon"><i class="far fa-heart"></i></div>
             <div class="empty-title">No followed podcasts</div>
@@ -1201,357 +1202,149 @@
         return;
       }
 
-      $('following-content').innerHTML = '<div class="skel-card"></div><div class="skel-card"></div>';
+      // Show loading
+      container.innerHTML = `
+        <div style="text-align:center;padding:40px 0;color:var(--text-3)">
+          <i class="fas fa-circle-notch spinner" style="font-size:24px;color:var(--accent)"></i>
+          <div style="margin-top:12px;font-size:13px">Loading feed...</div>
+        </div>
+      `;
 
-      try {
-        let allEpisodes = [];
-
-        for (const follow of state.follows) {
+      const results = await Promise.allSettled(
+        state.follows.map(async (pod) => {
           try {
-            const res = await fetch(follow.rss);
-            if (!res.ok) continue;
-            const xml = await res.text();
-            const { episodes } = parseRSS(xml);
+            const res = await fetchWithProxy(pod.rss);
+            const text = await res.text();
+            const parsed = parseRSS(text);
+            return parsed.episodes.slice(0, MAX_FEED_EPISODES).map(ep => ({
+              ...ep,
+              podcastTitle: parsed.title || pod.title,
+              podcastImage: parsed.image || pod.image,
+              podcastRss: pod.rss,
+              podcastArtist: parsed.artist || pod.artist || '',
+            }));
+          } catch(e) {
+            return [];
+          }
+        })
+      );
 
-            episodes.slice(0, 3).forEach(ep => {
-              allEpisodes.push({ ...ep, podcastTitle: follow.title, podcastImage: follow.image });
-            });
-          } catch(e) {}
-        }
+      let allEps = results
+        .filter(r => r.status === 'fulfilled')
+        .flatMap(r => r.value);
 
-        if (allEpisodes.length === 0) {
-          $('following-content').innerHTML = `
-            <div class="empty-state">
-              <div class="empty-icon"><i class="fas fa-inbox"></i></div>
-              <div class="empty-title">No episodes</div>
-              <div class="empty-sub">Your followed podcasts haven't released new episodes</div>
-            </div>
-          `;
-          return;
-        }
+      // Sort by date (newest first)
+      allEps.sort((a, b) => {
+        const da = new Date(a.date), db = new Date(b.date);
+        return (isNaN(db) ? 0 : db.getTime()) - (isNaN(da) ? 0 : da.getTime());
+      });
 
-        allEpisodes.sort((a, b) => new Date(b.date) - new Date(a.date));
-
-        $('following-content').innerHTML = allEpisodes.map((ep, i) => {
-          const hasDownload = state.downloads.some(d => d.id === ep.id);
-          return `
-            <div class="feed-ep">
-              <button class="ep-play-btn" onclick="playEpisode(${i}, ${JSON.stringify([ep]).replace(/"/g, '&quot;')})">
-                <i class="fas fa-play"></i>
-              </button>
-              <div class="feed-ep-info">
-                <div class="feed-ep-pod">${escAttr(ep.podcastTitle)}</div>
-                <div class="feed-ep-title">${escAttr(ep.title)}</div>
-                <div class="feed-ep-meta">
-                  <span>${formatDate(ep.date)}</span>
-                  ${ep.duration ? `<span>${formatDuration(ep.duration)}</span>` : ''}
-                </div>
-              </div>
-              <div class="feed-ep-actions">
-                <button class="feed-ep-btn${hasDownload ? ' done' : ''}" id="follow-dl-${i}" onclick="event.stopPropagation(); startDownloadEpisode('${escAttr(ep.url)}', '${escAttr(ep.title)}', '${escAttr(ep.podcastTitle)}', '${ep.id}', 'follow-dl-${i}')">
-                  <i class="fas fa-${hasDownload ? 'check' : 'download'}"></i>
-                </button>
-              </div>
-            </div>
-          `;
-        }).join('');
-      } catch(e) {
-        $('following-content').innerHTML = `
+      if (allEps.length === 0) {
+        container.innerHTML = `
           <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="empty-title">Error loading feed</div>
-            <div class="empty-sub">Could not fetch episodes</div>
-          </div>
-        `;
-      }
-    }
-
-    async function startDownloadEpisode(url, title, podcast, episodeId, btnId) {
-      const btn = $(`${btnId}`);
-      if (!btn) return;
-
-      if (state.downloads.some(d => d.id === episodeId)) {
-        showToast('Already downloaded', '');
-        return;
-      }
-
-      btn.classList.add('staging');
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-      btn.disabled = true;
-
-      state.dlQueue.push({ url, title, podcast, episodeId, btnId });
-      processDownloadQueue();
-    }
-
-    async function processDownloadQueue() {
-      while (state.dlQueue.length > 0) {
-        const { url, title, podcast, episodeId, btnId } = state.dlQueue.shift();
-        await downloadEpisode(url, title, podcast, episodeId, btnId);
-      }
-    }
-
-    async function downloadEpisode(url, title, podcast, episodeId, btnId) {
-      const btn = $(btnId);
-      if (!btn) return;
-
-      try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-        const reader = response.body.getReader();
-        const chunks = [];
-        const contentLength = parseInt(response.headers.get('content-length') || '0', 10);
-        let receivedLength = 0;
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          chunks.push(value);
-          receivedLength += value.length;
-        }
-
-        const blob = new Blob(chunks, { type: 'audio/*' });
-        const ext = getAudioExt(url);
-
-        await storeDownload(episodeId, title, podcast, blob, ext, url);
-
-        const dlEntry = { id: episodeId, title, podcast, url, ext, timestamp: Date.now() };
-        state.downloads.push(dlEntry);
-        saveState();
-
-        btn.classList.remove('staging');
-        btn.classList.add('done');
-        btn.innerHTML = '<i class="fas fa-check"></i>';
-        btn.disabled = false;
-
-        showToast(`${title.substring(0, 30)}... downloaded`, 'success');
-      } catch(e) {
-        btn.classList.remove('staging');
-        btn.classList.add('failed');
-        btn.innerHTML = '<i class="fas fa-exclamation"></i>';
-        btn.disabled = false;
-        setTimeout(() => {
-          btn.classList.remove('failed');
-          btn.innerHTML = '<i class="fas fa-download"></i>';
-        }, 3000);
-        showToast('Download failed', 'error');
-      }
-    }
-
-    async function renderDownloads() {
-      if (state.downloads.length === 0) {
-        $('downloads-content').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-circle-down"></i></div>
-            <div class="empty-title">No downloads yet</div>
-            <div class="empty-sub">Downloaded episodes will appear here</div>
+            <div class="empty-icon"><i class="fas fa-face-meh"></i></div>
+            <div class="empty-title">No episodes found</div>
+            <div class="empty-sub">Could not load episodes from your followed podcasts</div>
           </div>
         `;
         return;
       }
 
-      try {
-        const allDls = await getAllDownloads();
-
-        $('downloads-content').innerHTML = state.downloads.map(dl => {
-          const found = allDls.find(d => d.id === dl.id);
-          const size = found ? formatBytes(found.blob.size) : '?';
-          return `
-            <div class="dl-item">
-              <div class="dl-item-icon"><i class="fas fa-music"></i></div>
-              <div class="dl-item-info">
-                <div class="dl-item-title">${escAttr(dl.title)}</div>
-                <div class="dl-item-sub">${escAttr(dl.podcast)} • ${size}</div>
-              </div>
-              <div class="dl-item-actions">
-                <button class="dl-item-btn" onclick="playDownloadedEpisode('${dl.id}')"><i class="fas fa-play"></i></button>
-                <button class="dl-item-btn" onclick="saveDownloadedFile('${dl.id}')"><i class="fas fa-download"></i></button>
-                <button class="dl-item-btn danger" onclick="removeDownload('${dl.id}')"><i class="fas fa-trash"></i></button>
-              </div>
+      container.innerHTML = allEps.map((ep, i) => `
+        <div class="feed-ep">
+          <img class="feed-ep-art" src="${ep.podcastImage}" alt="" loading="lazy" onclick="openPodcastDetail('${escAttr(ep.podcastRss)}','${escAttr(ep.podcastTitle)}','${escAttr(ep.podcastImage)}','${escAttr(ep.podcastArtist)}')" onerror="this.style.background='var(--surface-3)'">
+          <div class="feed-ep-info">
+            <div class="feed-ep-pod">${ep.podcastTitle}</div>
+            <div class="feed-ep-title">${ep.title}</div>
+            <div class="feed-ep-meta">
+              <span>${formatDate(ep.date)}</span>
+              ${ep.duration ? `<span>&middot;</span><span>${formatDuration(ep.duration)}</span>` : ''}
             </div>
-          `;
-        }).join('');
-      } catch(e) {
-        $('downloads-content').innerHTML = `
-          <div class="empty-state">
-            <div class="empty-icon"><i class="fas fa-exclamation-triangle"></i></div>
-            <div class="empty-title">Error loading downloads</div>
-            <div class="empty-sub">Could not load downloaded episodes</div>
           </div>
-        `;
-      }
+          <div class="feed-ep-actions">
+            <button style="width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--accent-dim);color:var(--accent);font-size:12px" onclick="playEpisodeFromFeed(${i})" aria-label="Play"><i class="fas fa-play"></i></button>
+          </div>
+        </div>
+      `).join('');
+
+      // Store for playback reference
+      state._feedEps = allEps;
     }
 
-    async function playDownloadedEpisode(episodeId) {
-      try {
-        const record = await getDownload(episodeId);
-        if (!record) {
-          showToast('Episode not found', 'error');
-          return;
-        }
-
-        const url = URL.createObjectURL(record.blob);
-        audio.src = url;
-        audio.load();
-        audio.play();
-        state.isPlaying = true;
-
-        state.currentEpisode = { title: record.title, url: record.url };
-        $('mini-title').textContent = record.title;
-        $('mini-sub').textContent = record.podcast;
-        $('mini-play-icon').className = 'fas fa-pause';
-        $('mini-player').classList.add('visible');
-        openFullPlayer();
-      } catch(e) {
-        showToast('Could not play episode', 'error');
-      }
-    }
-
-    async function saveDownloadedFile(episodeId) {
-      try {
-        const record = await getDownload(episodeId);
-        if (!record) {
-          showToast('Episode not found', 'error');
-          return;
-        }
-
-        if ('showSaveFilePicker' in window) {
-          const handle = await window.showSaveFilePicker({
-            suggestedName: `${sanitize(record.title)}.${record.ext}`,
-            types: [{ description: 'Audio File', accept: { 'audio/*': [`.${record.ext}`] } }]
-          });
-
-          const writable = await handle.createWritable();
-          await writable.write(record.blob);
-          await writable.close();
-          showToast('File saved successfully', 'success');
-        } else {
-          const url = URL.createObjectURL(record.blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `${sanitize(record.title)}.${record.ext}`;
-          a.click();
-          URL.revokeObjectURL(url);
-          showToast('File downloaded', 'success');
-        }
-      } catch(e) {
-        showToast('Could not save file', 'error');
-      }
-    }
-
-    async function removeDownload(episodeId) {
-      try {
-        await deleteDownload(episodeId);
-        state.downloads = state.downloads.filter(d => d.id !== episodeId);
-        saveState();
-        renderDownloads();
-        showToast('Download removed', '');
-      } catch(e) {
-        showToast('Could not remove download', 'error');
-      }
-    }
-
-    function playEpisode(index, episodes) {
-      const ep = episodes[index];
+    function playEpisodeFromFeed(index) {
+      const ep = state._feedEps[index];
+      if (!ep) return;
       state.currentEpisode = ep;
+      startPlayback(ep, ep.podcastTitle, ep.podcastImage);
+    }
 
+    // ========================================
+    // PLAYBACK
+    // ========================================
+
+    function playEpisodeFromDetail(index) {
+      const ep = state.currentEpisodes[index];
+      if (!ep) return;
+      state.currentEpisode = ep;
+      startPlayback(ep, state.currentPodcast.title, state.currentPodcast.image);
+    }
+
+    function startPlayback(ep, podcastTitle, podcastImage) {
       audio.src = ep.url;
-      audio.load();
-      audio.play();
+      audio.playbackRate = state.speed;
+      audio.play().catch(() => {});
       state.isPlaying = true;
 
+      // Mini player
+      $('mini-art').src = podcastImage || '';
       $('mini-title').textContent = ep.title;
-      $('mini-sub').textContent = state.currentPodcast?.title || 'Unknown Podcast';
+      $('mini-sub').textContent = podcastTitle;
       $('mini-play-icon').className = 'fas fa-pause';
       $('mini-player').classList.add('visible');
 
-      $('fp-artwork').src = state.currentPodcast?.image || '';
+      // Full player
+      $('fp-artwork').src = podcastImage || '';
       $('fp-title').textContent = ep.title;
-      $('fp-podcast').textContent = state.currentPodcast?.title || 'Unknown';
+      $('fp-podcast').textContent = podcastTitle;
+      $('fp-play-icon').className = 'fas fa-pause';
+      $('fp-speed-btn').textContent = state.speed + 'x';
 
-      openFullPlayer();
+      // Add padding for mini player
+      document.querySelectorAll('.view-content').forEach(vc => vc.classList.add('has-player'));
     }
 
     function togglePlayback() {
-      if (audio.src) {
-        if (state.isPlaying) {
-          audio.pause();
-          state.isPlaying = false;
-          $('fp-play-icon').className = 'fas fa-play';
-          $('mini-play-icon').className = 'fas fa-play';
-        } else {
-          audio.play();
-          state.isPlaying = true;
-          $('fp-play-icon').className = 'fas fa-pause';
-          $('mini-play-icon').className = 'fas fa-pause';
-        }
+      if (state.isPlaying) {
+        audio.pause();
+      } else {
+        audio.play().catch(() => {});
       }
+      state.isPlaying = !state.isPlaying;
+      updatePlayIcons();
     }
 
-    function seekRelative(offset) {
-      if (audio.src) audio.currentTime = Math.max(0, Math.min(audio.duration, audio.currentTime + offset));
+    function updatePlayIcons() {
+      const cls = state.isPlaying ? 'fas fa-pause' : 'fas fa-play';
+      $('mini-play-icon').className = cls;
+      $('fp-play-icon').className = cls;
     }
 
-    function cycleSpeed() {
-      const idx = SPEEDS.indexOf(state.speed);
-      state.speed = SPEEDS[(idx + 1) % SPEEDS.length];
-      audio.playbackRate = state.speed;
-      $('fp-speed-btn').textContent = state.speed === 1 ? '1x' : state.speed.toFixed(2) + 'x';
-      saveState();
+    function seekRelative(seconds) {
+      audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
     }
 
-    function openFullPlayer() {
-      $('full-player').classList.add('open');
-    }
-
-    function closeFullPlayer() {
-      $('full-player').classList.remove('open');
-    }
-
-    function clearSearchHistory() {
-      if (confirm('Clear search history?')) {
-        state.searchHistory = [];
-        saveState();
-        renderSearchEmpty();
-        showToast('Search history cleared', '');
-      }
-    }
-
-    function clearFollows() {
-      if (confirm('Clear followed podcasts?')) {
-        state.follows = [];
-        saveState();
-        loadFollowingFeed();
-        showToast('Follows cleared', '');
-      }
-    }
-
-    async function clearDownloads() {
-      if (confirm('Delete all downloads? This cannot be undone.')) {
-        try {
-          const db = await openDB();
-          const tx = db.transaction(STORE_NAME, 'readwrite');
-          tx.objectStore(STORE_NAME).clear();
-          state.downloads = [];
-          saveState();
-          renderDownloads();
-          showToast('Downloads cleared', '');
-        } catch(e) {
-          showToast('Could not clear downloads', 'error');
-        }
-      }
-    }
-
-    function cancelDownloadAll() {
-      state.dlQueue = [];
-      showToast('Downloads cancelled', '');
-    }
+    // Seek bar
+    $('fp-seek-bar').addEventListener('input', e => {
+      const pct = e.target.value / 1000;
+      if (audio.duration) audio.currentTime = pct * audio.duration;
+    });
 
     // Audio events
     audio.addEventListener('timeupdate', () => {
-      const pct = audio.duration ? (audio.currentTime / audio.duration) * 100 : 0;
-      $('mini-progress-fill').style.width = `${pct}%`;
-      $('fp-seek-bar').value = audio.duration ? (audio.currentTime / audio.duration) * 1000 : 0;
+      if (!audio.duration) return;
+      const pct = (audio.currentTime / audio.duration) * 100;
+      $('mini-progress-fill').style.width = pct + '%';
+      $('fp-seek-bar').value = (audio.currentTime / audio.duration) * 1000;
       $('fp-time-current').textContent = formatTime(audio.currentTime);
     });
 
@@ -1561,33 +1354,327 @@
 
     audio.addEventListener('ended', () => {
       state.isPlaying = false;
-      $('fp-play-icon').className = 'fas fa-play';
-      $('mini-play-icon').className = 'fas fa-play';
+      updatePlayIcons();
     });
 
-    $('fp-seek-bar').addEventListener('input', (e) => {
-      if (audio.duration) audio.currentTime = (parseFloat(e.target.value) / 1000) * audio.duration;
-    });
+    audio.addEventListener('play', () => { state.isPlaying = true; updatePlayIcons(); });
+    audio.addEventListener('pause', () => { state.isPlaying = false; updatePlayIcons(); });
 
-    // Speed options
-    function initSpeedOptions() {
-      $('speed-options').innerHTML = SPEEDS.map(s => `
-        <button class="speed-opt${s === state.speed ? ' active' : ''}" onclick="setSpeed(${s})">${s === 1 ? '1x' : s.toFixed(2) + 'x'}</button>
+    // Full player open/close
+    function openFullPlayer() {
+      $('full-player').classList.add('open');
+    }
+    function closeFullPlayer() {
+      $('full-player').classList.remove('open');
+    }
+
+    // Speed
+    function cycleSpeed() {
+      const idx = SPEEDS.indexOf(state.speed);
+      state.speed = SPEEDS[(idx + 1) % SPEEDS.length];
+      audio.playbackRate = state.speed;
+      $('fp-speed-btn').textContent = state.speed + 'x';
+      saveState();
+      showToast(`Playback: ${state.speed}x`);
+    }
+
+    // ========================================
+    // DOWNLOADS - Single Episode (Staging)
+    // ========================================
+
+    async function downloadSingleEpisode(episodeIndex) {
+      const ep = state.currentEpisodes[episodeIndex];
+      if (!ep) return;
+
+      const btn = $(`ep-dl-${episodeIndex}`);
+      if (!btn) return;
+
+      // Stage 1: Preparing (fetch the blob)
+      btn.innerHTML = '<i class="fas fa-circle-notch spinner"></i>';
+      btn.classList.add('staging');
+
+      try {
+        const res = await fetchWithProxy(ep.url);
+        const blob = await res.blob();
+        const ext = getAudioExt(ep.url);
+        const fileName = `${sanitize(ep.title)}.${ext}`;
+
+        // Stage 2: Ready to save
+        btn.innerHTML = '<i class="fas fa-floppy-disk"></i>';
+        btn.classList.remove('staging');
+
+        btn.onclick = async () => {
+          btn.innerHTML = '<i class="fas fa-circle-notch spinner"></i>';
+          try {
+            if ('showSaveFilePicker' in window) {
+              const handle = await window.showSaveFilePicker({
+                suggestedName: fileName,
+                types: [{ description: 'Audio', accept: { 'audio/*': [`.${ext}`] } }]
+              });
+              const writable = await handle.createWritable();
+              await writable.write(blob);
+              await writable.close();
+            } else {
+              // Fallback: traditional download
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url; a.download = fileName;
+              document.body.appendChild(a); a.click(); a.remove();
+              URL.revokeObjectURL(url);
+            }
+
+            btn.innerHTML = '<i class="fas fa-circle-check"></i>';
+            btn.classList.remove('staging');
+            btn.classList.add('done');
+            showToast('Downloaded', 'success');
+
+            // Record in download history
+            state.downloads.unshift({
+              episodeTitle: ep.title,
+              podcastTitle: state.currentPodcast?.title || '',
+              url: ep.url,
+              date: new Date().toISOString()
+            });
+            saveState();
+
+            // Reset button after a moment
+            setTimeout(() => {
+              btn.innerHTML = '<i class="fas fa-circle-down"></i>';
+              btn.classList.remove('done');
+              btn.onclick = () => downloadSingleEpisode(episodeIndex);
+            }, 3000);
+
+          } catch(err) {
+            if (err.name === 'AbortError') {
+              btn.innerHTML = '<i class="fas fa-floppy-disk"></i>'; // Still staged, can retry
+            } else {
+              btn.innerHTML = '<i class="fas fa-circle-xmark"></i>';
+              btn.classList.add('failed');
+              showToast('Save failed');
+              setTimeout(() => {
+                btn.innerHTML = '<i class="fas fa-circle-down"></i>';
+                btn.classList.remove('failed','staging');
+                btn.onclick = () => downloadSingleEpisode(episodeIndex);
+              }, 3000);
+            }
+          }
+        };
+
+      } catch(err) {
+        btn.innerHTML = '<i class="fas fa-circle-xmark"></i>';
+        btn.classList.remove('staging');
+        btn.classList.add('failed');
+        showToast('Download failed');
+        setTimeout(() => {
+          btn.innerHTML = '<i class="fas fa-circle-down"></i>';
+          btn.classList.remove('failed');
+          btn.onclick = () => downloadSingleEpisode(episodeIndex);
+        }, 3000);
+      }
+    }
+
+    // ========================================
+    // DOWNLOADS - All Episodes (Folder)
+    // ========================================
+
+    async function downloadAllPodcast() {
+      if (!state.currentPodcast || state.currentEpisodes.length === 0) return;
+
+      if (!('showDirectoryPicker' in window)) {
+        showToast('Requires Chrome desktop for folder access', 'error');
+        return;
+      }
+
+      const total = state.currentEpisodes.length;
+      state.downloadAllCancelled = false;
+
+      // Show modal
+      $('dl-modal-title').textContent = 'Downloading Episodes';
+      $('dl-modal-sub').textContent = `0 of ${total}`;
+      $('dl-modal-fill').style.width = '0%';
+      $('dl-modal-detail').textContent = 'Starting...';
+      $('download-modal').classList.add('visible');
+
+      try {
+        const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+        const podFolder = await dirHandle.getDirectoryHandle(
+          sanitize(state.currentPodcast.title), { create: true }
+        );
+
+        let completed = 0;
+        let failed = 0;
+
+        for (let i = 0; i < total; i++) {
+          if (state.downloadAllCancelled) break;
+
+          const ep = state.currentEpisodes[i];
+          $('dl-modal-detail').textContent = ep.title;
+          $('dl-modal-sub').textContent = `${i + 1} of ${total}`;
+
+          try {
+            const res = await fetchWithProxy(ep.url);
+            const blob = await res.blob();
+            const ext = getAudioExt(ep.url);
+            const fileName = `${sanitize(ep.title)}.${ext}`;
+
+            const fileHandle = await podFolder.getFileHandle(fileName, { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(blob);
+            await writable.close();
+            completed++;
+
+            // Record download
+            state.downloads.unshift({
+              episodeTitle: ep.title,
+              podcastTitle: state.currentPodcast.title,
+              url: ep.url,
+              date: new Date().toISOString()
+            });
+          } catch(e) {
+            failed++;
+          }
+
+          const pct = ((i + 1) / total) * 100;
+          $('dl-modal-fill').style.width = pct + '%';
+        }
+
+        saveState();
+
+        // Show result
+        if (state.downloadAllCancelled) {
+          $('dl-modal-title').textContent = 'Download Cancelled';
+          $('dl-modal-sub').textContent = `${completed} of ${total} saved`;
+        } else {
+          $('dl-modal-title').textContent = 'Download Complete';
+          $('dl-modal-sub').textContent = `${completed} saved${failed > 0 ? `, ${failed} failed` : ''}`;
+        }
+        $('dl-modal-detail').textContent = '';
+        $('dl-modal-fill').style.width = '100%';
+        $('dl-modal-cancel').textContent = 'Done';
+
+      } catch(err) {
+        if (err.name === 'AbortError') {
+          $('download-modal').classList.remove('visible');
+        } else {
+          $('dl-modal-title').textContent = 'Download Failed';
+          $('dl-modal-sub').textContent = err.message || 'Could not access folder';
+          $('dl-modal-detail').textContent = '';
+          $('dl-modal-cancel').textContent = 'Close';
+        }
+      }
+    }
+
+    function cancelDownloadAll() {
+      state.downloadAllCancelled = true;
+      $('download-modal').classList.remove('visible');
+      $('dl-modal-cancel').textContent = 'Cancel';
+    }
+
+    // ========================================
+    // DOWNLOADS TAB
+    // ========================================
+
+    function renderDownloads() {
+      const container = $('downloads-content');
+      if (state.downloads.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div class="empty-icon"><i class="fas fa-circle-down"></i></div>
+            <div class="empty-title">No downloads yet</div>
+            <div class="empty-sub">Downloaded episodes will appear here</div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = state.downloads.map((dl, i) => `
+        <div class="dl-item">
+          <div class="dl-item-icon"><i class="fas fa-circle-down"></i></div>
+          <div class="dl-item-info">
+            <div class="dl-item-title">${dl.episodeTitle}</div>
+            <div class="dl-item-sub">${dl.podcastTitle} &middot; ${formatDate(dl.date)}</div>
+          </div>
+          <button class="dl-item-redl" onclick="redoDownload(${i})">Re-download</button>
+        </div>
       `).join('');
     }
 
-    function setSpeed(speed) {
-      state.speed = speed;
-      audio.playbackRate = speed;
-      $('fp-speed-btn').textContent = speed === 1 ? '1x' : speed.toFixed(2) + 'x';
-      saveState();
-      initSpeedOptions();
+    async function redoDownload(index) {
+      const dl = state.downloads[index];
+      if (!dl) return;
+
+      try {
+        const res = await fetchWithProxy(dl.url);
+        const blob = await res.blob();
+        const ext = getAudioExt(dl.url);
+        const fileName = `${sanitize(dl.episodeTitle)}.${ext}`;
+
+        if ('showSaveFilePicker' in window) {
+          const handle = await window.showSaveFilePicker({
+            suggestedName: fileName,
+            types: [{ description: 'Audio', accept: { 'audio/*': [`.${ext}`] } }]
+          });
+          const writable = await handle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+        } else {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = fileName;
+          document.body.appendChild(a); a.click(); a.remove();
+          URL.revokeObjectURL(url);
+        }
+        showToast('Downloaded', 'success');
+      } catch(e) {
+        if (e.name !== 'AbortError') showToast('Download failed', 'error');
+      }
     }
 
-    // Initialize
+    // ========================================
+    // SETTINGS
+    // ========================================
+
+    // Render speed options
+    function renderSpeedOptions() {
+      $('speed-options').innerHTML = SPEEDS.map(s => `
+        <button class="speed-opt ${s === state.speed ? 'active' : ''}" onclick="setSpeed(${s})">${s}x</button>
+      `).join('');
+    }
+
+    function setSpeed(s) {
+      state.speed = s;
+      audio.playbackRate = s;
+      $('fp-speed-btn').textContent = s + 'x';
+      saveState();
+      renderSpeedOptions();
+    }
+
+    function clearSearchHistory() {
+      state.searchHistory = [];
+      saveState();
+      renderSearchEmpty();
+      showToast('Search history cleared', 'success');
+    }
+
+    function clearFollows() {
+      state.follows = [];
+      saveState();
+      showToast('Followed podcasts cleared', 'success');
+    }
+
+    function clearDownloads() {
+      state.downloads = [];
+      saveState();
+      renderDownloads();
+      showToast('Download history cleared', 'success');
+    }
+
+    // ========================================
+    // INIT
+    // ========================================
+
+    renderSpeedOptions();
     renderSearchEmpty();
-    initSpeedOptions();
-    audio.playbackRate = state.speed;
   </script>
 </body>
 </html>
